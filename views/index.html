@@ -1,0 +1,822 @@
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visite</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        var arr;
+        var med;
+        var old = [];
+        var tab = {};
+        var tabMed = {};
+        var pazienti = [];
+        var medicine = [];
+        var colonne;
+        var righe;
+        const { jsPDF } = window.jspdf;
+
+
+        var download = async () => {
+            let now = new Date().toLocaleDateString('it-IT').replace(/\//g, '_');
+            var doc = new jsPDF();
+            if (Object.keys(tab).length > 0) {
+                Object.keys(tab).forEach(a => {
+                    colonne = [];
+                    Object.values(tab[a]).forEach(b => {
+                        Object.keys(b).forEach(c => {
+                            c = c.replaceAll("_", " ");
+                            if (!colonne.includes(c)) colonne.push(c);
+                        });
+                    });
+                    righe = tab[a].map(obj => Object.values(obj));
+                    //console.log("colonne", colonne)
+                    //console.log("righe dopo", righe)
+                    doc.autoTable({
+                        head: [colonne],
+                        body: righe,
+                        startY: 20,
+                        pageBreak: 'avoid',
+                        headStyles: { fontSize: 14 },
+                        bodyStyles: { fontSize: 14 },
+                        theme: 'grid'
+                    });
+                    doc.save(a + "_" + now + ".pdf");
+                })
+            } else if (arr.length > 0) {
+                colonne = Object.keys(arr[0]).map(key => key.replaceAll("_", " "));
+                righe = arr.map(obj => Object.values(obj));
+                doc.autoTable({
+                    head: [colonne],
+                    body: righe,
+                    startY: 20,
+                    pageBreak: 'avoid',
+                    headStyles: { fontSize: 14 },
+                    bodyStyles: { fontSize: 14 },
+                    theme: 'grid'
+                });
+                doc.save(arr[0].PAZIENTE + "_" + now + ".pdf");
+            } else {
+                console.log("Nessun paziente trovato");
+                alert("Impossibile scaricare il nulla");
+            }
+        };
+
+        var downloadAll = async (file) => {
+            let now = new Date().toLocaleDateString('it-IT').replace(/\//g, '_');
+            var doc = new jsPDF();
+
+            if ((arr && Array.isArray(arr) && arr.length > 0) || (med && Array.isArray(med) && med.length > 0)) {
+                if (file == "visite") {
+                    colonne = Object.keys(arr[0]).map(key => key.replaceAll("_", " "));
+                    righe = arr.map(obj => Object.values(obj));
+                    console.log("RIGHE => ", righe);
+                    righe.sort((a, b) => {
+                        const parseData = str => {
+                            const [d, m, y] = str.split("/");
+                            return new Date(`20${y}`, m - 1, d);
+                        };
+
+                        const parseOra = str => {
+                            const [h, min] = str.split(":");
+                            return h * 60 + +min; // minuti totali per confronto semplice
+                        };
+
+                        const dataA = parseData(a[1]);
+                        const dataB = parseData(b[1]);
+
+                        if (dataA - dataB !== 0) {
+                            return dataA - dataB; // ordina per data
+                        } else {
+                            return parseOra(a[2]) - parseOra(b[2]); // se stessa data → ordina per ora
+                        }
+                    });
+
+
+                }
+                else if (file == "medicine") {
+                    colonne = Object.keys(med[0]).map(key => key.replaceAll("_", " "));
+                    righe = med.map(obj => Object.values(obj));
+                }
+                doc.autoTable({
+                    head: [colonne],
+                    body: righe,
+                    startY: 20,
+                    pageBreak: 'avoid',
+                    headStyles: { fontSize: 14 },
+                    bodyStyles: { fontSize: 14 },
+                    theme: 'grid'
+                });
+                if (file == "visite") doc.save("visite_" + now + ".pdf");
+                else if (file == "medicine") doc.save("medicine_" + now + ".pdf");
+            } else {
+                console.log("Nessun dato trovato");
+                alert("Impossibile scaricare il nulla");
+            }
+        };
+
+        var riordinaPerData = async (array) => {
+            array.sort((a, b) => {
+                const parseDate = (dateStr) => {
+                    let [day, month, year] = dateStr.split('/');
+                    year = parseInt(year, 10) < 100 ? `20${year}` : year; // Gestisce l'anno con due cifre
+                    return new Date(year, month - 1, day); // Mese base 0 in JavaScript
+                };
+                a.PAZIENTE = a.PAZIENTE.toLowerCase();
+                return parseDate(a.DATA) - parseDate(b.DATA);
+            });
+            return array;
+        };
+
+        var writeFile = async (arr) => {
+            console.log("arr.length 2 =>", arr.length);
+            fetch("/api/writevisite", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(arr)
+            })
+                .then(response => response.text())
+                .then(msg => alert(msg))
+                .catch(err => console.error("Errore:", err));
+        };
+
+        var writeMedicine = async (arr) => {
+            console.log("arr.length 2 =>", arr.length);
+            fetch("/api/writemedicine", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(arr)
+            })
+                .then(response => response.text())
+                .then(msg => alert(msg))
+                .catch(err => console.error("Errore:", err));
+        };
+
+        var addForm = async () => {
+            let formContainer = document.getElementById("formContainer");
+            let originalForm = document.querySelector(".dynamic-form");
+            let newForm = originalForm.cloneNode(true); // Clona la form esistente
+
+            // Resetta i valori dei campi nella nuova form
+            newForm.querySelector(".paziente").value = "";
+            newForm.querySelector(".data").value = "";
+            newForm.querySelector(".ora").value = "";
+            newForm.querySelector(".luogo").value = "";
+            newForm.querySelector(".tipoVisita").value = "";
+            newForm.querySelector(".note").value = "";
+
+            formContainer.appendChild(newForm); // Aggiunge la nuova form alla pagina
+        };
+
+        var addFormMedicina = async () => {
+            let formContainer = document.getElementById("formContainer");
+            let originalForm = document.querySelector(".dynamic-form");
+            let newForm = originalForm.cloneNode(true); // Clona la form esistente
+
+            // Resetta i valori dei campi nella nuova form
+            newForm.querySelector(".paziente").value = "";
+            newForm.querySelector(".medicina").value = "";
+            newForm.querySelector(".giorno").value = "";
+            newForm.querySelector(".ora").value = "";
+            newForm.querySelector(".note").value = "";
+
+            formContainer.appendChild(newForm); // Aggiunge la nuova form alla pagina
+        };
+
+        var aggiungiMedicina = async (event) => {
+            event.preventDefault(); // Previene l'invio del form
+            let formMedicine = document.querySelectorAll(".form-medicine");
+
+            var sizeBEF = med.length;
+            formMedicine.forEach((form, index) => {
+                console.log("FORM =>", form)
+                let paziente = form.querySelector(".paziente").value;
+                let medicina = form.querySelector(".medicina").value;
+                let giorno = form.querySelector(".giorno").value;
+                let ora = form.querySelector(".ora").value;
+                let note = form.querySelector(".note").value;
+                console.log("form medicina =>", paziente, medicina, giorno, ora, note);
+                if (paziente == "" && medicina == "" && ora == "" && giorno == "" && note == "") {
+                    console.log("non hai compilato nessun campo!");
+                    return;
+                } else {/*
+                    let day = data.split("-")[2];
+                    let month = data.split("-")[1];
+                    let year = data.split("-")[0].split("")[2] + "" + data.split("-")[0].split("")[3];
+                    data = day + "/" + month + "/" + year;*/
+                    med.push(
+                        {
+                            PAZIENTE: paziente.toLowerCase(),
+                            MEDICINA: medicina.toLowerCase() == "" ? " " : medicina.toLowerCase(),
+                            GIORNO: giorno,
+                            ORA: ora,
+                            NOTE: note.toLowerCase() == "" ? " " : note.toLowerCase()
+                        });
+                    form.reset();
+                }
+            });
+            var sizeAFT = med.length;
+            if (sizeBEF != sizeAFT) {
+                fetch("/api/writemedicine", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(med)
+                })
+                    .then(response => response.text())
+                    .then(msg => alert(msg))
+                    .catch(err => console.error("Errore:", err));
+            }
+            console.log(med);
+
+            await leggiMedicine();
+            //alert("Visite aggiornate con successo.");
+        };
+
+        var aggiungiVisita = async (event) => {
+            event.preventDefault(); // Previene l'invio del form
+            let formVisite = document.querySelectorAll(".form-visite");
+
+            var sizeBEF = arr.length;
+            formVisite.forEach((form, index) => {
+                let paziente = form.querySelector(".paziente").value;
+                let data = form.querySelector(".data").value;
+                let ora = form.querySelector(".ora").value;
+                let luogo = form.querySelector(".luogo").value;
+                let tipoVisita = form.querySelector(".tipoVisita").value;
+                let note = form.querySelector(".note").value;
+                console.log("form =>", paziente, data, ora, luogo, tipoVisita, note);
+                if (paziente == "" && ora == "" && luogo == "" && tipoVisita == "" && note == "") {
+                    console.log("non hai compilato nessun campo!");
+                    return;
+                } else {
+                    let day = data.split("-")[2];
+                    let month = data.split("-")[1];
+                    let year = data.split("-")[0].split("")[2] + "" + data.split("-")[0].split("")[3];
+                    data = day + "/" + month + "/" + year;
+                    arr.push(
+                        {
+                            PAZIENTE: paziente.toLowerCase(),
+                            DATA: data,
+                            ORA: ora,
+                            LUOGO: luogo.toLowerCase() == "" ? " " : luogo.toLowerCase(),
+                            TIPO_VISITA: tipoVisita.toLowerCase() == "" ? " " : tipoVisita.toLowerCase(),
+                            NOTE: note.toLowerCase() == "" ? " " : note.toLowerCase()
+                        });
+                    form.reset();
+                }
+            });
+            var sizeAFT = arr.length;
+            if (sizeBEF != sizeAFT) {
+                fetch("/api/writevisite", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(arr)
+                })
+                    .then(response => response.text())
+                    .then(msg => alert(msg))
+                    .catch(err => console.error("Errore:", err));
+            }
+            console.log(arr);
+
+            await leggiVisite();
+            //alert("Visite aggiornate con successo.");
+        };
+        var createTableFromArray = async (ar) => {
+            if (ar && Array.isArray(ar) && ar.length > 0) {
+                //RIORDINO ARRAY PER DATA
+                if (ar[0].DATA) ar = await riordinaPerData(ar);
+
+                console.log(ar);
+
+                var table = document.createElement("table");
+                var thead = document.createElement("thead");
+                var tbody = document.createElement("tbody");
+
+                // Aggiungi intestazioni
+                var headers = Object.keys(ar[0]);
+                var headerRow = document.createElement("tr");
+                headers.forEach(header => {
+                    var th = document.createElement("th");
+                    th.textContent = header;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+
+                // Aggiungi righe di dati
+                ar.forEach(row => {
+                    var dataRow = document.createElement("tr");
+                    headers.forEach(header => {
+                        var td = document.createElement("td");
+                        td.textContent = row[header];
+                        dataRow.appendChild(td);
+                    });
+                    tbody.appendChild(dataRow);
+                });
+
+                table.appendChild(thead);
+                table.appendChild(tbody);
+                const tableContainer = document.getElementById("tableContainer");
+                tableContainer.innerHTML = ""; // Svuota il contenitore
+                tableContainer.appendChild(table); // Aggiungi la tabella al DOM
+            } else {
+                console.log("File visite.json vuoto");
+            }
+            //return table;
+        }
+        var checkDate = async (arr) => {
+            let now = new Date();
+            let month = now.getMonth() + 1;
+            now = now.getDate() + "/" + month + "/" + now.getFullYear();
+            let anno;
+            let mese;
+            let giorno;
+            try {
+                arr.forEach(e => {
+                    anno = Number(e.DATA.split("/")[2]);
+                    mese = Number(e.DATA.split("/")[1]);
+                    giorno = Number(e.DATA.split("/")[0]);
+                    if (anno < Number(now.split("/")[2].slice(2)) ||
+                        (anno == Number(now.split("/")[2].slice(2)) && mese < Number(now.split("/")[1])) ||
+                        (anno == Number(now.split("/")[2].slice(2)) && mese == Number(now.split("/")[1]) && giorno < Number(now.split("/")[0]))) {
+                        old.push(e);
+                    };
+                });
+                console.log("OLD =>", old);
+                if (old && Array.isArray(old) && old.length > 0) {
+                    arr = arr.filter(el => !old.includes(el));
+                };
+                console.log("arr.length =>", arr.length);
+                //console.log("oldFile =>", oldFile);
+                console.log("old =>", old);
+                await writeFile(arr);
+            } catch (er) {
+                console.log("Errore nella pulizia delle date");
+            }/*
+
+            fetch("/api/writevisite", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(arr)
+                })
+                    .then(response => response.text())
+                    .then(msg => alert(msg))
+                    .catch(err => console.error("Errore:", err));
+                    */
+            await leggiFile();
+        }
+        /*        var leggiOld = async () => {
+                                fetch("/api/readstorico", {
+                                    method: "GET",
+                                    headers: { "Content-Type": "application/json" }
+                                })
+                                    .then(response => response.text())
+                                    .then(data => { oldFile = data })
+                                    .catch(err => console.error("Errore:", err));
+                };
+                            */
+        var leggiVisite = async () => {
+            try {
+                const response = await fetch("/api/read", {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" }
+                });
+                if (!response.ok) {
+                    console.log("Errore lettura file");
+                    //throw new Error(`Errore HTTP! Status: ${response.status}`);
+                }
+                arr = await response.json();
+                console.log("read length =>", arr.length);
+
+                if (arr && Array.isArray(arr) && arr.length > 0) {
+
+
+                    arr.forEach(el => {
+                        if (!pazienti.includes(el.PAZIENTE)) pazienti.push(el.PAZIENTE);
+                    });
+                    await pazienti.forEach(a => {
+                        tab[a] = [];
+                    });
+
+                    arr.forEach(b => {
+                        Object.keys(tab).forEach(a => {
+                            if (a == b.PAZIENTE) {
+                                tab[a].push(b);
+                            };
+                        });
+                    });
+
+                    await Object.keys(tab).forEach(async c => {
+                        tab[c] = await riordinaPerData(tab[c]);
+                    })
+
+                    //console.log("TAB =>", JSON.stringify(tab));
+
+                    if (Object.keys(tab).length == 1) {
+                        //console.log("1 PAZIENTE");
+                        await createTableFromArray(arr);
+                    } else {
+                        //console.log("PIU PAZIENTI");
+                        await createTables(tab);
+                    }
+
+                } else console.log("file vuoto");
+            } catch (err) {
+                console.error("Errore durante la lettura del file:", err);
+                return null; // Valore di fallback in caso di errore
+            }
+        };
+        var leggiMedicine = async () => {
+            try {
+                const response = await fetch("/api/readmedicine", {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" }
+                });
+                if (!response.ok) {
+                    console.log("Errore lettura file");
+                    //throw new Error(`Errore HTTP! Status: ${response.status}`);
+                }
+                med = await response.json();
+                console.log("read length =>", med.length);
+
+                if (med && Array.isArray(med) && med.length > 0) {
+
+
+                    med.forEach(el => {
+                        if (!medicine.includes(el.PAZIENTE)) medicine.push(el.PAZIENTE);
+                    });
+                    await medicine.forEach(a => {
+                        tabMed[a] = [];
+                    });
+
+                    med.forEach(b => {
+                        Object.keys(tabMed).forEach(a => {
+                            if (a == b.PAZIENTE) {
+                                tabMed[a].push(b);
+                            };
+                        });
+                    });
+
+                    /*await Object.keys(tab).forEach(async c => {
+                        tab[c] = await riordinaPerData(tab[c]);
+                    })*/
+
+                    if (Object.keys(tabMed).length == 1) {
+                        await createTableFromArray(med);
+                    } else {
+                        await createTables(tabMed);
+                    }
+
+                } else console.log("file vuoto");
+            } catch (err) {
+                console.error("Errore durante la lettura del file:", err);
+                return null; // Valore di fallback in caso di errore
+            }
+        };
+        var createTables = async (tab) => {
+            const container = document.getElementById('tableContainer');
+            container.innerHTML = ""; // Svuota il contenitore
+
+            Object.entries(tab).forEach(([key, array]) => {
+                if (array.length === 0) return;
+
+                const table = document.createElement("table");
+                const thead = document.createElement("thead");
+                const tbody = document.createElement("tbody");
+
+                // Aggiungi titolo
+                /*const title = document.createElement("div");
+                title.className = "table-title";
+                title.textContent = key;
+                container.appendChild(title);*/
+
+                // Aggiungi intestazioni
+                const headers = Object.keys(array[0]);
+                const headerRow = document.createElement("tr");
+                headers.forEach(header => {
+                    const th = document.createElement("th");
+                    th.textContent = header.replaceAll("_", " ");
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+
+                // Aggiungi righe di dati
+                array.forEach(row => {
+                    const dataRow = document.createElement("tr");
+                    headers.forEach(header => {
+                        const td = document.createElement("td");
+                        td.textContent = row[header];
+                        dataRow.appendChild(td);
+                    });
+                    tbody.appendChild(dataRow);
+                });
+
+                table.appendChild(thead);
+                table.appendChild(tbody);
+                container.appendChild(table);
+            });
+        }
+        var mostraVisite = async () => {
+            document.getElementById('formVisite').style.display = 'block';
+            document.getElementById('formMedicine').style.display = 'none';
+        }
+        var mostraMedicine = async () => {
+            document.getElementById('formVisite').style.display = 'none';
+            document.getElementById('formMedicine').style.display = 'block';
+        }
+    </script>
+    <style>
+        .table-form {
+            border-collapse: collapse;
+            margin-top: 1px;
+            background-color: #ffffff;
+            font-size: 15px;
+
+            td {
+                padding: 8px;
+                border: none;
+            }
+
+            input,
+            select,
+            textarea {
+                width: 100%;
+                padding: 3px;
+                box-sizing: border-box;
+                font-size: 15px;
+            }
+        }
+
+        .leggi {
+            flex: none;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sinistra {
+            background-color: #ffffff;
+            width: 80%;
+            color: white;
+            font-size: 24px;
+
+            .alto {
+                height: 15%;
+                background-color: #ffffff;
+                align-items: center;
+                justify-content: center;
+                color: black;
+            }
+
+            ;
+
+            .basso {
+                height: 85%;
+                background-color: #ffffff;
+                align-items: center;
+                justify-content: center;
+                color: black;
+            }
+        }
+
+        .destra {
+            background-color: #a0c9eb;
+            width: 30%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 15px;
+            margin: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 25px;
+
+            th,
+            td {
+                border: 1px solid #ddd;
+                padding: 12px;
+                text-align: center;
+            }
+
+            th {
+                background-color: #f4f4f4;
+            }
+
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+
+            tr:hover {
+                background-color: #f1f1f1;
+            }
+
+            .form-section {
+                transition: opacity 0.3s ease;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sinistra">
+        <div class="alto">
+            <h1>Casa Chiesa
+                <button type="button" class="leggi" onclick="leggiVisite(), mostraVisite()">Leggi visite</button>
+                <button type="button" class="leggi" onclick="leggiMedicine(), mostraMedicine()">Leggi medicine</button>
+                <button id="checkDate" onclick="checkDate(arr)">Pulisci date vecchie e Salva</button>
+            </h1>
+        </div>
+        <div class="basso">
+            <pre id="tableContainer"></pre>
+        </div>
+    </div>
+
+    <div class="destra">
+        <!-- Form VISITE -->
+        <div id="formVisite" class="form-section">
+            <h1>Aggiungi visite</h1>
+            <!--<button type="button" onclick="addForm()">Aggiungi righe</button> -->
+            <button type="submit" onclick="aggiungiVisita(event)">Salva</button>
+            <button id="submit" onclick="download('visite')">Scarica separati</button>
+            <button id="submit" onclick="downloadAll('visite')">Scarica insieme</button>
+            <form class="dynamic-form form-visite">
+                <table class="table-form">
+                    <tr>
+                        <td> <label for="paziente">Paziente</label> </td>
+                        <td> <input type="text" class="paziente" name="paziente" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="data">Data</label> </td>
+                        <td> <input type="date" class="data" name="data" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="ora">Ora</label> </td>
+                        <td> <input type="text" class="ora" name="ora" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="luogo">Luogo</label> </td>
+                        <td> <input type="text" class="luogo" name="luogo" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="tipoVisita">Tipo Visita</label> </td>
+                        <td> <input type="text" class="tipoVisita" name="tipoVisita" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="note">Note</label> </td>
+                        <td> <input type="text" class="note" name="note"> </td>
+                    </tr>
+                </table>
+            </form>
+            <form class="dynamic-form form-visite">
+                <table class="table-form">
+                    <tr>
+                        <td> <label for="paziente">Paziente</label> </td>
+                        <td> <input type="text" class="paziente" name="paziente" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="data">Data</label> </td>
+                        <td> <input type="date" class="data" name="data" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="ora">Ora</label> </td>
+                        <td> <input type="text" class="ora" name="ora" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="luogo">Luogo</label> </td>
+                        <td> <input type="text" class="luogo" name="luogo" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="tipoVisita">Tipo Visita</label> </td>
+                        <td> <input type="text" class="tipoVisita" name="tipoVisita" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="note">Note</label> </td>
+                        <td> <input type="text" class="note" name="note"> </td>
+                    </tr>
+                </table>
+            </form>
+            <form class="dynamic-form form-visite">
+                <table class="table-form">
+                    <tr>
+                        <td> <label for="paziente">Paziente</label> </td>
+                        <td> <input type="text" class="paziente" name="paziente" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="data">Data</label> </td>
+                        <td> <input type="date" class="data" name="data" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="ora">Ora</label> </td>
+                        <td> <input type="text" class="ora" name="ora" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="luogo">Luogo</label> </td>
+                        <td> <input type="text" class="luogo" name="luogo" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="tipoVisita">Tipo Visita</label> </td>
+                        <td> <input type="text" class="tipoVisita" name="tipoVisita" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="note">Note</label> </td>
+                        <td> <input type="text" class="note" name="note"> </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+
+        <!-- Form MEDICINE -->
+        <div id="formMedicine" class="form-section" style="display:none;">
+            <h1>Aggiungi medicine</h1>
+            <!-- <button type="button" onclick="addFormMedicina()">Aggiungi righe</button> -->
+            <button type="submit" onclick="aggiungiMedicina(event)">Salva</button>
+            <button id="submit" onclick="downloadAll('medicine')">Scarica insieme</button>
+            <form class="dynamic-form form-medicine">
+                <table class="table-form">
+                    <tr>
+                        <td> <label for="paziente">Paziente</label> </td>
+                        <td> <input type="text" class="paziente" name="paziente" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="medicina">Medicina</label> </td>
+                        <td> <input type="text" class="medicina" name="medicina" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="giorno">Data</label> </td>
+                        <td> <input type="text" class="giorno" name="giorno" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="ora">Ora</label> </td>
+                        <td> <input type="text" class="ora" name="ora" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="note">Note</label> </td>
+                        <td> <input type="text" class="note" name="note"> </td>
+                    </tr>
+                </table>
+            </form>
+            <form class="dynamic-form form-medicine">
+                <table class="table-form">
+                    <tr>
+                        <td> <label for="paziente">Paziente</label> </td>
+                        <td> <input type="text" class="paziente" name="paziente" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="medicina">Medicina</label> </td>
+                        <td> <input type="text" class="medicina" name="medicina" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="giorno">Data</label> </td>
+                        <td> <input type="text" class="giorno" name="giorno" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="ora">Ora</label> </td>
+                        <td> <input type="text" class="ora" name="ora" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="note">Note</label> </td>
+                        <td> <input type="text" class="note" name="note"> </td>
+                    </tr>
+                </table>
+            </form>
+            <form class="dynamic-form form-medicine">
+                <table class="table-form">
+                    <tr>
+                        <td> <label for="paziente">Paziente</label> </td>
+                        <td> <input type="text" class="paziente" name="paziente" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="medicina">Medicina</label> </td>
+                        <td> <input type="text" class="medicina" name="medicina" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="giorno">Data</label> </td>
+                        <td> <input type="text" class="giorno" name="giorno" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="ora">Ora</label> </td>
+                        <td> <input type="text" class="ora" name="ora" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="note">Note</label> </td>
+                        <td> <input type="text" class="note" name="note"> </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+
+
+
+</body>
+
+</html>

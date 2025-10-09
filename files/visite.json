@@ -1,0 +1,10 @@
+[
+  {
+    "PAZIENTE": "Vittorio",
+    "DATA": "03/03/25",
+    "ORA": "10.30",
+    "LUOGO": "Brescia",
+    "TIPO_VISITA": "ecografia tiroide",
+    "NOTE": "richieste analisi del sangue"
+  }
+]
