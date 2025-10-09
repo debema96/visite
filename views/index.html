@@ -16,14 +16,15 @@
         var medicine = [];
         var colonne;
         var righe;
+        var doc;
         const { jsPDF } = window.jspdf;
 
 
-        var download = async () => {
+        var download = async (file) => {
             let now = new Date().toLocaleDateString('it-IT').replace(/\//g, '_');
-            var doc = new jsPDF();
             if (Object.keys(tab).length > 0) {
                 Object.keys(tab).forEach(a => {
+                    doc = new jsPDF();
                     colonne = [];
                     Object.values(tab[a]).forEach(b => {
                         Object.keys(b).forEach(c => {
@@ -32,6 +33,29 @@
                         });
                     });
                     righe = tab[a].map(obj => Object.values(obj));
+                    if (file == "visite") {
+                        righe.sort((a, b) => {
+                            const parseDate = str => {
+                                const [d, m, y] = str.split("/");
+                                return new Date(`20${y}`, m - 1, d);
+                            };
+
+                            const parseTime = str => {
+                                const [h, min, s = 0] = str.split(":").map(Number);
+                                return h * 3600 + min * 60 + s; // converte tutto in secondi
+                            };
+
+                            const dataA = parseDate(a[1]);
+                            const dataB = parseDate(b[1]);
+
+                            if (dataA - dataB !== 0) {
+                                return dataA - dataB; // confronto per data
+                            } else {
+                                //console.log("differenze orario a=> ", a[2], " b=>", b[2])
+                                return parseTime(a[2]) - parseTime(b[2]); // confronto per ora
+                            }
+                        });
+                    }
                     //console.log("colonne", colonne)
                     //console.log("righe dopo", righe)
                     doc.autoTable({
@@ -72,25 +96,25 @@
                 if (file == "visite") {
                     colonne = Object.keys(arr[0]).map(key => key.replaceAll("_", " "));
                     righe = arr.map(obj => Object.values(obj));
-                    console.log("RIGHE => ", righe);
                     righe.sort((a, b) => {
-                        const parseData = str => {
+                        const parseDate = str => {
                             const [d, m, y] = str.split("/");
                             return new Date(`20${y}`, m - 1, d);
                         };
 
-                        const parseOra = str => {
-                            const [h, min] = str.split(":");
-                            return h * 60 + +min; // minuti totali per confronto semplice
+                        const parseTime = str => {
+                            const [h, min, s = 0] = str.split(":").map(Number);
+                            return h * 3600 + min * 60 + s; // converte tutto in secondi
                         };
 
-                        const dataA = parseData(a[1]);
-                        const dataB = parseData(b[1]);
+                        const dataA = parseDate(a[1]);
+                        const dataB = parseDate(b[1]);
 
                         if (dataA - dataB !== 0) {
-                            return dataA - dataB; // ordina per data
+                            return dataA - dataB; // confronto per data
                         } else {
-                            return parseOra(a[2]) - parseOra(b[2]); // se stessa data → ordina per ora
+                            //console.log("differenze orario a=> ", a[2], " b=>", b[2])
+                            return parseTime(a[2]) - parseTime(b[2]); // confronto per ora
                         }
                     });
 
