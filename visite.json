@@ -118,5 +118,13 @@
     "LUOGO": "test",
     "TIPO_VISITA": "prova",
     "NOTE": " "
+  },
+  {
+    "PAZIENTE": "carla",
+    "DATA": "14/10/25",
+    "ORA": "14:30",
+    "LUOGO": "bergamo",
+    "TIPO_VISITA": "operazione al cuore",
+    "NOTE": " "
   }
 ]

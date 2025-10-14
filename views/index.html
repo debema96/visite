@@ -20,9 +20,15 @@
         const { jsPDF } = window.jspdf;
         const giorniOrdinati = ["lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"];
 
-        const parseTime = async(str) => {
-                    const [h, min, s = 0] = str.split(":").map(Number);
-                    return h * 3600 + min * 60 + s; // converte tutto in secondi
+        const parseTime = async (str) => {
+            const [h, min, s = 0] = str.split(":").map(Number);
+            return h * 3600 + min * 60 + s; // converte tutto in secondi
+        };
+
+        const parseDate = async (dateStr) => {
+            let [day, month, year] = dateStr.split('/');
+            year = parseInt(year, 10) < 100 ? `20${year}` : year; // Gestisce l'anno con due cifre
+            return new Date(year, month - 1, day); // Mese base 0 in JavaScript
         };
 
         var download = async (file) => {
@@ -102,16 +108,6 @@
                     colonne = Object.keys(arr[0]).map(key => key.replaceAll("_", " "));
                     righe = arr.map(obj => Object.values(obj));
                     righe.sort((a, b) => {
-                        const parseDate = str => {
-                            const [d, m, y] = str.split("/");
-                            return new Date(`20${y}`, m - 1, d);
-                        };
-
-                        const parseTime = str => {
-                            const [h, min, s = 0] = str.split(":").map(Number);
-                            return h * 3600 + min * 60 + s; // converte tutto in secondi
-                        };
-
                         const dataA = parseDate(a[1]);
                         const dataB = parseDate(b[1]);
 
@@ -148,11 +144,6 @@
 
         var riordinaPerData = async (array) => {
             array.sort((a, b) => {
-                const parseDate = (dateStr) => {
-                    let [day, month, year] = dateStr.split('/');
-                    year = parseInt(year, 10) < 100 ? `20${year}` : year; // Gestisce l'anno con due cifre
-                    return new Date(year, month - 1, day); // Mese base 0 in JavaScript
-                };
                 a.PAZIENTE = a.PAZIENTE.toLowerCase();
                 return parseDate(a.DATA) - parseDate(b.DATA);
             });
@@ -166,12 +157,14 @@
                     res.push(el);
                 }
             });
-            console.log("res 1 ->", res.length)
+            //console.log("res 1 ->", res.length)
             //ordino per orario tutti quelli che non sono di un giorno preciso
             res = res.sort((a, b) => {
-                return parseTime(a[2]) - parseTime(b[2]); // confronto per ora
+                //console.log("a => ", a);
+                //console.log("a => ", a.ORA, " b =>", b.ORA);
+                return parseTime(a.ORA) - parseTime(b.ORA); // confronto per ora
             });
-            console.log("res 2 ->", res.length)
+            //console.log("res 2 ->", res.length)
             //ora metto in ordine per giorno e poi orario
             var a;
             giorniOrdinati.forEach(gg => {
@@ -188,11 +181,12 @@
                 });
                 res.concat(a);
             });
-            console.log("res 3 ->", res.length)
+            //console.log("res 3 ->", res.length)
+            return res;
         };
 
         var writeFile = async (arr) => {
-            console.log("arr.length 2 =>", arr.length);
+            //console.log("arr.length 2 =>", arr.length);
             fetch("/api/writevisite", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -204,7 +198,7 @@
         };
 
         var writeMedicine = async (arr) => {
-            //console.log("arr.length 2 =>", arr.length);
+            //console.log("salvo medicine =>", arr.length);
             fetch("/api/writemedicine", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -252,13 +246,13 @@
 
             var sizeBEF = med.length;
             formMedicine.forEach((form, index) => {
-                console.log("FORM =>", form)
+                //console.log("FORM =>", form)
                 let paziente = form.querySelector(".paziente").value;
                 let medicina = form.querySelector(".medicina").value;
                 let giorno = form.querySelector(".giorno").value;
                 let ora = form.querySelector(".ora").value;
                 let note = form.querySelector(".note").value;
-                console.log("form medicina =>", paziente, medicina, giorno, ora, note);
+                //console.log("form medicina =>", paziente, medicina, giorno, ora, note);
                 if (paziente == "" && medicina == "" && ora == "" && giorno == "" && note == "") {
                     console.log("non hai compilato nessun campo!");
                     return;
@@ -266,7 +260,7 @@
                     if (/^(?:[0-9]|1\d|2[0-3]):[0-5]\d$/.test(ora)) {
                         //console.log("orario ok: ", ora)
                     } else if (/^(?:[0-9]|1\d|2[0-3]).[0-5]\d$/.test(ora)) {
-                        ora = ora.replace(".",":");
+                        ora = ora.replaceAll(".", ":");
                     }
                     med.push(
                         {
@@ -282,16 +276,9 @@
             var sizeAFT = med.length;
             med = await riordinaPerGiorno(med);
             if (sizeBEF != sizeAFT) {
-                fetch("/api/writemedicine", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(med)
-                })
-                    .then(response => response.text())
-                    .then(msg => alert(msg))
-                    .catch(err => console.error("Errore:", err));
+                writeMedicine(med);
             }
-            console.log(med);
+            //console.log(med);
 
             await leggiMedicine();
             //alert("Visite aggiornate con successo.");
@@ -309,7 +296,7 @@
                 let luogo = form.querySelector(".luogo").value;
                 let tipoVisita = form.querySelector(".tipoVisita").value;
                 let note = form.querySelector(".note").value;
-                console.log("form =>", paziente, data, ora, luogo, tipoVisita, note);
+                //console.log("form =>", paziente, data, ora, luogo, tipoVisita, note);
                 if (paziente == "" && ora == "" && luogo == "" && tipoVisita == "" && note == "") {
                     console.log("non hai compilato nessun campo!");
                     return;
@@ -322,7 +309,7 @@
                     if (/^(?:[0-9]|1\d|2[0-3]):[0-5]\d$/.test(ora)) {
                         //console.log("orario ok: ", ora)
                     } else if (/^(?:[0-9]|1\d|2[0-3]).[0-5]\d$/.test(ora)) {
-                        ora = ora.replace(".",":");
+                        ora = ora.replace(".", ":");
                     }
                     arr.push(
                         {
@@ -338,16 +325,9 @@
             });
             var sizeAFT = arr.length;
             if (sizeBEF != sizeAFT) {
-                fetch("/api/writevisite", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(arr)
-                })
-                    .then(response => response.text())
-                    .then(msg => alert(msg))
-                    .catch(err => console.error("Errore:", err));
+                writeFile(arr);
             }
-            console.log(arr);
+            //console.log(arr);
 
             await leggiVisite();
             //alert("Visite aggiornate con successo.");
@@ -357,7 +337,7 @@
                 //RIORDINO ARRAY PER DATA
                 if (ar[0].DATA) ar = await riordinaPerData(ar);
 
-                console.log(ar);
+                //console.log(ar);
 
                 var table = document.createElement("table");
                 var thead = document.createElement("thead");
@@ -412,27 +392,17 @@
                         old.push(e);
                     };
                 });
-                console.log("OLD =>", old);
+                //console.log("OLD =>", old);
                 if (old && Array.isArray(old) && old.length > 0) {
                     arr = arr.filter(el => !old.includes(el));
                 };
-                console.log("arr.length =>", arr.length);
+                //console.log("arr.length =>", arr.length);
                 //console.log("oldFile =>", oldFile);
-                console.log("old =>", old);
+                //console.log("old =>", old);
                 await writeFile(arr);
             } catch (er) {
                 console.log("Errore nella pulizia delle date");
-            }/*
-
-            fetch("/api/writevisite", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(arr)
-                })
-                    .then(response => response.text())
-                    .then(msg => alert(msg))
-                    .catch(err => console.error("Errore:", err));
-                    */
+            }
             await leggiFile();
         }
         /*        var leggiOld = async () => {
@@ -456,7 +426,7 @@
                     //throw new Error(`Errore HTTP! Status: ${response.status}`);
                 }
                 arr = await response.json();
-                console.log("read length =>", arr.length);
+                //console.log("read length =>", arr.length);
 
                 if (arr && Array.isArray(arr) && arr.length > 0) {
 
@@ -507,7 +477,7 @@
                     //throw new Error(`Errore HTTP! Status: ${response.status}`);
                 }
                 med = await response.json();
-                console.log("read length =>", med.length);
+                console.log("medicine lette =>", med.length);
 
                 if (med && Array.isArray(med) && med.length > 0) {
 
