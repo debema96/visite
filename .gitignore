@@ -1,0 +1,16 @@
+# build e distribuzione
+dist/
+build/
+
+# file temporanei
+*.log
+*.tmp
+
+# impostazioni locali
+.env
+.DS_Store
+.vscode/
+.idea/
+
+# file PDF o output generati automaticamente
+*.pdf

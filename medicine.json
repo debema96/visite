@@ -3,28 +3,28 @@
     "PAZIENTE": "debora",
     "MEDICINA": "eutirox",
     "GIORNO": "tutti i giorni",
-    "ORA": "09.00",
+    "ORA": "09:00",
     "NOTE": "prima di colazione"
   },
   {
     "PAZIENTE": "debora",
     "MEDICINA": "zoely",
     "GIORNO": "tutti i giorni",
-    "ORA": "24.00",
+    "ORA": "24:00",
     "NOTE": "prima di dormire"
   },
   {
     "PAZIENTE": "debora",
     "MEDICINA": "allopurinolo",
     "GIORNO": "tutti i giorni",
-    "ORA": "cena",
+    "ORA": "21:00",
     "NOTE": "stomaco pieno"
   },
   {
     "PAZIENTE": "vittorio",
     "MEDICINA": "eutirox",
     "GIORNO": "tutti i giorni",
-    "ORA": "09.00",
+    "ORA": "09:00",
     "NOTE": "prima di colazione"
   }
 ]

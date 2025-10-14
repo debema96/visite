@@ -48,20 +48,6 @@ class IOFile {
         }
     }
 
-    writeMedicine = async (arr) => {
-        // Converti l'array in una stringa JSON
-        const jsonData = JSON.stringify(arr, null, 2); // `null, 2` per formattare il JSON in modo leggibile
-
-        // Scrivi il JSON in un file chiamato "visite.json"
-        fs.writeFile('medicine.json', jsonData, (err) => {
-            if (err) {
-                console.error('Errore durante la scrittura del file:', err);
-            } else {
-                console.log('Dati salvati correttamente in visite.json');
-            }
-        });
-    };
-
 
 }
 

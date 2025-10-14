@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visite</title>
+    <title>Visite e Medicine</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script>
@@ -18,7 +18,12 @@
         var righe;
         var doc;
         const { jsPDF } = window.jspdf;
+        const giorniOrdinati = ["lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"];
 
+        const parseTime = async(str) => {
+                    const [h, min, s = 0] = str.split(":").map(Number);
+                    return h * 3600 + min * 60 + s; // converte tutto in secondi
+        };
 
         var download = async (file) => {
             let now = new Date().toLocaleDateString('it-IT').replace(/\//g, '_');
@@ -154,6 +159,38 @@
             return array;
         };
 
+        var riordinaPerGiorno = async (arr) => {
+            let res = [];
+            arr.forEach(el => {
+                if (!giorniOrdinati.includes(el[2])) {
+                    res.push(el);
+                }
+            });
+            console.log("res 1 ->", res.length)
+            //ordino per orario tutti quelli che non sono di un giorno preciso
+            res = res.sort((a, b) => {
+                return parseTime(a[2]) - parseTime(b[2]); // confronto per ora
+            });
+            console.log("res 2 ->", res.length)
+            //ora metto in ordine per giorno e poi orario
+            var a;
+            giorniOrdinati.forEach(gg => {
+                a = [];
+                arr.forEach(el => {
+                    if (giorniOrdinati.includes(el[2])) {
+                        if (gg == el[2]) {
+                            a.push(el);
+                        }
+                    };
+                });
+                a = a.sort((a, b) => {
+                    return parseTime(a[2]) - parseTime(b[2]); // confronto per ora
+                });
+                res.concat(a);
+            });
+            console.log("res 3 ->", res.length)
+        };
+
         var writeFile = async (arr) => {
             console.log("arr.length 2 =>", arr.length);
             fetch("/api/writevisite", {
@@ -167,7 +204,7 @@
         };
 
         var writeMedicine = async (arr) => {
-            console.log("arr.length 2 =>", arr.length);
+            //console.log("arr.length 2 =>", arr.length);
             fetch("/api/writemedicine", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -242,6 +279,7 @@
                 }
             });
             var sizeAFT = med.length;
+            med = await riordinaPerGiorno(med);
             if (sizeBEF != sizeAFT) {
                 fetch("/api/writemedicine", {
                     method: "POST",
