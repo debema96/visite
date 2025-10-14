@@ -262,11 +262,12 @@
                 if (paziente == "" && medicina == "" && ora == "" && giorno == "" && note == "") {
                     console.log("non hai compilato nessun campo!");
                     return;
-                } else {/*
-                    let day = data.split("-")[2];
-                    let month = data.split("-")[1];
-                    let year = data.split("-")[0].split("")[2] + "" + data.split("-")[0].split("")[3];
-                    data = day + "/" + month + "/" + year;*/
+                } else {
+                    if (/^(?:[0-9]|1\d|2[0-3]):[0-5]\d$/.test(ora)) {
+                        //console.log("orario ok: ", ora)
+                    } else if (/^(?:[0-9]|1\d|2[0-3]).[0-5]\d$/.test(ora)) {
+                        ora = ora.replace(".",":");
+                    }
                     med.push(
                         {
                             PAZIENTE: paziente.toLowerCase(),
@@ -317,6 +318,12 @@
                     let month = data.split("-")[1];
                     let year = data.split("-")[0].split("")[2] + "" + data.split("-")[0].split("")[3];
                     data = day + "/" + month + "/" + year;
+
+                    if (/^(?:[0-9]|1\d|2[0-3]):[0-5]\d$/.test(ora)) {
+                        //console.log("orario ok: ", ora)
+                    } else if (/^(?:[0-9]|1\d|2[0-3]).[0-5]\d$/.test(ora)) {
+                        ora = ora.replace(".",":");
+                    }
                     arr.push(
                         {
                             PAZIENTE: paziente.toLowerCase(),
