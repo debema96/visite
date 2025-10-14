@@ -43,7 +43,7 @@ class IOFile {
         } else if (file == "medicine") {
              fs.writeFile('medicine.json', jsonData, (err) => {
                 if (err) { console.error('Errore durante la scrittura del file:', err); } 
-                    else { console.log('Dati salvati correttamente in visite.json'); }
+                    else { console.log('Dati salvati correttamente in medicine.json'); }
             });
         }
     }

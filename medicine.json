@@ -1,10 +1,10 @@
 [
   {
     "PAZIENTE": "debora",
-    "MEDICINA": "eutirox",
+    "MEDICINA": "allopurinolo",
     "GIORNO": "tutti i giorni",
-    "ORA": "09:00",
-    "NOTE": "prima di colazione"
+    "ORA": "22:00",
+    "NOTE": "dopo cena"
   },
   {
     "PAZIENTE": "debora",
@@ -15,37 +15,86 @@
   },
   {
     "PAZIENTE": "debora",
-    "MEDICINA": "allopurinolo",
+    "MEDICINA": "sonnifero",
     "GIORNO": "tutti i giorni",
-    "ORA": "21:00",
-    "NOTE": "stomaco pieno"
+    "ORA": "24:00",
+    "NOTE": "prima di dormire"
   },
   {
-    "PAZIENTE": "vittorio",
-    "MEDICINA": "eutirox",
+    "PAZIENTE": "nonno",
+    "MEDICINA": "eutirox 100",
     "GIORNO": "tutti i giorni",
-    "ORA": "09:00",
+    "ORA": "08:00",
     "NOTE": "prima di colazione"
   },
   {
     "PAZIENTE": "debora",
-    "MEDICINA": "test",
-    "GIORNO": "test",
-    "ORA": "12:55",
-    "NOTE": "test"
+    "MEDICINA": "eutirox 75",
+    "GIORNO": "lunedi",
+    "ORA": "08:00",
+    "NOTE": "prima di colazione"
   },
   {
-    "PAZIENTE": "patrizia",
-    "MEDICINA": "pressione",
-    "GIORNO": "tutti i giorni",
-    "ORA": "09:00",
-    "NOTE": " "
+    "PAZIENTE": "debora",
+    "MEDICINA": "eutirox 100",
+    "GIORNO": "martedi",
+    "ORA": "08:00",
+    "NOTE": "prima di colazione"
   },
   {
-    "PAZIENTE": "patrizia",
-    "MEDICINA": "vitamina d",
-    "GIORNO": "tutti i giorni",
-    "ORA": "16:00",
-    "NOTE": " "
+    "PAZIENTE": "nonno",
+    "MEDICINA": "eutirox 125",
+    "GIORNO": "martedi",
+    "ORA": "08:00",
+    "NOTE": "prima di colazione"
+  },
+  {
+    "PAZIENTE": "debora",
+    "MEDICINA": "t",
+    "GIORNO": "martedi",
+    "ORA": "12:00",
+    "NOTE": "t"
+  },
+  {
+    "PAZIENTE": "debora",
+    "MEDICINA": "t2",
+    "GIORNO": "martedi",
+    "ORA": "24:00",
+    "NOTE": "t2"
+  },
+  {
+    "PAZIENTE": "nonno",
+    "MEDICINA": "t3",
+    "GIORNO": "martedi",
+    "ORA": "18:00",
+    "NOTE": "t3"
+  },
+  {
+    "PAZIENTE": "debora",
+    "MEDICINA": "eutirox 75",
+    "GIORNO": "mercoledi",
+    "ORA": "08:00",
+    "NOTE": "prima di colazione"
+  },
+  {
+    "PAZIENTE": "debora",
+    "MEDICINA": "eutirox 75",
+    "GIORNO": "giovedi",
+    "ORA": "08:00",
+    "NOTE": "prima di colazione"
+  },
+  {
+    "PAZIENTE": "debora",
+    "MEDICINA": "eutirox 100",
+    "GIORNO": "venerdi",
+    "ORA": "08:00",
+    "NOTE": "prima di colazione"
+  },
+  {
+    "PAZIENTE": "debora",
+    "MEDICINA": "eutirox 75",
+    "GIORNO": "sabato",
+    "ORA": "08:00",
+    "NOTE": "prima di colazione"
   }
 ]

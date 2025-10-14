@@ -153,8 +153,10 @@
         var riordinaPerGiorno = async (arr) => {
             let res = [];
             arr.forEach(el => {
-                if (!giorniOrdinati.includes(el[2])) {
+                //console.log("GIORNO => ", el.GIORNO);
+                if (!giorniOrdinati.includes(el.GIORNO)) {
                     res.push(el);
+                    //console.log("RES => ", res.length);
                 }
             });
             //console.log("res 1 ->", res.length)
@@ -162,7 +164,7 @@
             res = res.sort((a, b) => {
                 //console.log("a => ", a);
                 //console.log("a => ", a.ORA, " b =>", b.ORA);
-                return parseTime(a.ORA) - parseTime(b.ORA); // confronto per ora
+                parseTime(a.ORA) - parseTime(b.ORA); // confronto per ora
             });
             //console.log("res 2 ->", res.length)
             //ora metto in ordine per giorno e poi orario
@@ -170,16 +172,22 @@
             giorniOrdinati.forEach(gg => {
                 a = [];
                 arr.forEach(el => {
-                    if (giorniOrdinati.includes(el[2])) {
-                        if (gg == el[2]) {
+                    if (giorniOrdinati.includes(el.GIORNO)) {
+                        //console.log("GG => ", gg, " GIORNO => ", el.GIORNO)
+                        if (gg == el.GIORNO) {
                             a.push(el);
+                            //console.log("entrato")
                         }
                     };
                 });
-                a = a.sort((a, b) => {
-                    return parseTime(a[2]) - parseTime(b[2]); // confronto per ora
+                a = a.sort((c, b) => {
+                    console.log("C => ", c.ORA, " B => ", b.ORA);
+                    parseTime(c.ORA) - parseTime(b.ORA); // confronto per ora
                 });
-                res.concat(a);
+                a.forEach(e => {
+                    res.push(e);
+                    //console.log("push finale")
+                })
             });
             //console.log("res 3 ->", res.length)
             return res;
@@ -247,21 +255,24 @@
             var sizeBEF = med.length;
             formMedicine.forEach((form, index) => {
                 //console.log("FORM =>", form)
-                let paziente = form.querySelector(".paziente").value;
-                let medicina = form.querySelector(".medicina").value;
-                let giorno = form.querySelector(".giorno").value;
-                let ora = form.querySelector(".ora").value;
-                let note = form.querySelector(".note").value;
+                var paziente = form.querySelector(".paziente").value;
+                var medicina = form.querySelector(".medicina").value;
+                var giorno = form.querySelector(".giorno").value;
+                var ora = form.querySelector(".ora").value;
+                var note = form.querySelector(".note").value;
                 //console.log("form medicina =>", paziente, medicina, giorno, ora, note);
                 if (paziente == "" && medicina == "" && ora == "" && giorno == "" && note == "") {
                     console.log("non hai compilato nessun campo!");
                     return;
                 } else {
-                    if (/^(?:[0-9]|1\d|2[0-3]):[0-5]\d$/.test(ora)) {
-                        //console.log("orario ok: ", ora)
-                    } else if (/^(?:[0-9]|1\d|2[0-3]).[0-5]\d$/.test(ora)) {
+                    if (/^(?:[01]?\d|2[0-3])[:.][0-5]\d$/.test(ora) || ora == '24.00' || ora == '24:00') {
                         ora = ora.replaceAll(".", ":");
-                    }
+                        if (ora.split(":")[0].length == 1) {
+                            ora = '0' + ora;
+                        }
+                    } else if (ora.length < 3 && !ora.includes(":") && !ora.includes(".")) {
+                        ora = ora + ':00';
+                    } else { ora = "" }
                     med.push(
                         {
                             PAZIENTE: paziente.toLowerCase(),
@@ -273,8 +284,8 @@
                     form.reset();
                 }
             });
-            var sizeAFT = med.length;
             med = await riordinaPerGiorno(med);
+            var sizeAFT = med.length;
             if (sizeBEF != sizeAFT) {
                 writeMedicine(med);
             }
@@ -309,7 +320,7 @@
                     if (/^(?:[0-9]|1\d|2[0-3]):[0-5]\d$/.test(ora)) {
                         //console.log("orario ok: ", ora)
                     } else if (/^(?:[0-9]|1\d|2[0-3]).[0-5]\d$/.test(ora)) {
-                        ora = ora.replace(".", ":");
+                        ora = ora.replaceAll(".", ":");
                     }
                     arr.push(
                         {
