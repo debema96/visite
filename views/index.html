@@ -156,17 +156,13 @@
                 //console.log("GIORNO => ", el.GIORNO);
                 if (!giorniOrdinati.includes(el.GIORNO)) {
                     res.push(el);
-                    //console.log("RES => ", res.length);
                 }
             });
-            //console.log("res 1 ->", res.length)
             //ordino per orario tutti quelli che non sono di un giorno preciso
             res = res.sort((a, b) => {
-                //console.log("a => ", a);
                 //console.log("a => ", a.ORA, " b =>", b.ORA);
                 parseTime(a.ORA) - parseTime(b.ORA); // confronto per ora
             });
-            //console.log("res 2 ->", res.length)
             //ora metto in ordine per giorno e poi orario
             var a;
             giorniOrdinati.forEach(gg => {
@@ -176,7 +172,6 @@
                         //console.log("GG => ", gg, " GIORNO => ", el.GIORNO)
                         if (gg == el.GIORNO) {
                             a.push(el);
-                            //console.log("entrato")
                         }
                     };
                 });

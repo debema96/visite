@@ -49,25 +49,18 @@
     "NOTE": "prima di colazione"
   },
   {
-    "PAZIENTE": "debora",
+    "PAZIENTE": "nonno",
     "MEDICINA": "t",
     "GIORNO": "martedi",
-    "ORA": "12:00",
+    "ORA": "18:00",
     "NOTE": "t"
   },
   {
     "PAZIENTE": "debora",
     "MEDICINA": "t2",
     "GIORNO": "martedi",
-    "ORA": "24:00",
+    "ORA": "06:00",
     "NOTE": "t2"
-  },
-  {
-    "PAZIENTE": "nonno",
-    "MEDICINA": "t3",
-    "GIORNO": "martedi",
-    "ORA": "18:00",
-    "NOTE": "t3"
   },
   {
     "PAZIENTE": "debora",
