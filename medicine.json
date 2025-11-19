@@ -1,1 +1,86 @@
-[]
+[
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "1 pantorc 40 mg",
+    "GIORNO": "tutti i giorni",
+    "ORA": "colazione",
+    "NOTE": "gastroprotettore"
+  },
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "1 olmesartan 40 mg",
+    "GIORNO": "tutti i giorni",
+    "ORA": "colazione",
+    "NOTE": ""
+  },
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "mioamin silver",
+    "GIORNO": "tutti i giorni",
+    "ORA": "metà mattina",
+    "NOTE": "novembre e dicembre \\ pausa 2 mesi \\ prossimi 2 mesi riprendere, cura continuativa"
+  },
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "natecal d3 600mg + 400 u.i.",
+    "GIORNO": "giorni alterni, 1 si e 1 no",
+    "ORA": "metà mattina",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "rivaroxaban 15 mg",
+    "GIORNO": "tutti i giorni",
+    "ORA": "pranzo",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "eutimil 20 mg",
+    "GIORNO": "tutti i giorni",
+    "ORA": "pranzo",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "cardioaspirina (acitil salicidico)",
+    "GIORNO": "tutti i giorni",
+    "ORA": "pranzo",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "amlodipina 10 mg",
+    "GIORNO": "tutti i giorni",
+    "ORA": "cena",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "rosuvastaina 20 mg",
+    "GIORNO": "tutti i giorni",
+    "ORA": "cena",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "ezetimibe 10 mg",
+    "GIORNO": "tutti i giorni",
+    "ORA": "cena",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "colecalciferolo 10000ui/ml (vitamina d)",
+    "GIORNO": "tutti i giorni",
+    "ORA": "cena",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "carla",
+    "MEDICINA": "folina 5 mg (alterno 3 mesi si e 3 mesi no)",
+    "GIORNO": "tutti i giorni",
+    "ORA": "",
+    "NOTE": "cura tao"
+  }
+]

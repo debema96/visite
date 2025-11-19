@@ -18,7 +18,8 @@
         var righe;
         var doc;
         const { jsPDF } = window.jspdf;
-        const giorniOrdinati = ["lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"];
+        const giorni = ["lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica", "tutti i giorni", "giorni alterni"];
+        const orari = ["colazione", "metà mattina", "pranzo", "metà pomeriggio", "cena"];
 
         const parseTime = async (str) => {
             const [h, min, s = 0] = str.split(":").map(Number);
@@ -151,6 +152,24 @@
         };
 
         var riordinaPerGiorno = async (arr) => {
+            var res = [];
+            //colazione, metà mattina, pranzo, metà pomeriggio, cena
+            orari.forEach(o => {
+                arr.forEach(a => {
+                    if (a.ORA == o)
+                        res.push(a);
+                });
+            });
+
+            arr.forEach(esc => {
+                if (!res.includes(esc))
+                    res.push(esc);
+            });
+
+            return res;
+        };
+
+        var riordinaPerGiornoOld = async (arr) => {
             let res = [];
             arr.forEach(el => {
                 //console.log("GIORNO => ", el.GIORNO);
@@ -260,14 +279,14 @@
                     console.log("non hai compilato nessun campo!");
                     return;
                 } else {
-                    if (/^(?:[01]?\d|2[0-3])[:.][0-5]\d$/.test(ora) || ora == '24.00' || ora == '24:00') {
-                        ora = ora.replaceAll(".", ":");
-                        if (ora.split(":")[0].length == 1) {
-                            ora = '0' + ora;
-                        }
-                    } else if (ora.length < 3 && !ora.includes(":") && !ora.includes(".")) {
-                        ora = ora + ':00';
-                    } else { ora = "" }
+                    /* if (/^(?:[01]?\d|2[0-3])[:.][0-5]\d$/.test(ora) || ora == '24.00' || ora == '24:00') {
+                         ora = ora.replaceAll(".", ":");
+                         if (ora.split(":")[0].length == 1) {
+                             ora = '0' + ora;
+                         }
+                     } else if (ora.length < 3 && !ora.includes(":") && !ora.includes(".")) {
+                         ora = ora + ':00';
+                     } else { ora = "" }*/
                     med.push(
                         {
                             PAZIENTE: paziente.toLowerCase(),
@@ -338,6 +357,7 @@
             await leggiVisite();
             //alert("Visite aggiornate con successo.");
         };
+
         var createTableFromArray = async (ar) => {
             if (ar && Array.isArray(ar) && ar.length > 0) {
                 //RIORDINO ARRAY PER DATA
@@ -380,6 +400,7 @@
             }
             //return table;
         }
+
         var checkDate = async (arr) => {
             let now = new Date();
             let month = now.getMonth() + 1;
@@ -421,6 +442,7 @@
                                     .catch(err => console.error("Errore:", err));
                 };
                             */
+
         var leggiVisite = async () => {
             try {
                 const response = await fetch("/api/read", {
@@ -472,6 +494,7 @@
                 return null; // Valore di fallback in caso di errore
             }
         };
+
         var leggiMedicine = async () => {
             try {
                 const response = await fetch("/api/readmedicine", {
@@ -519,6 +542,7 @@
                 return null; // Valore di fallback in caso di errore
             }
         };
+
         var createTables = async (tab) => {
             const container = document.getElementById('tableContainer');
             container.innerHTML = ""; // Svuota il contenitore
@@ -562,14 +586,17 @@
                 container.appendChild(table);
             });
         }
+
         var mostraVisite = async () => {
             document.getElementById('formVisite').style.display = 'block';
             document.getElementById('formMedicine').style.display = 'none';
         }
+
         var mostraMedicine = async () => {
             document.getElementById('formVisite').style.display = 'none';
             document.getElementById('formMedicine').style.display = 'block';
         }
+
     </script>
     <style>
         .table-form {
@@ -688,7 +715,7 @@
     <div class="destra">
         <!-- Form VISITE -->
         <div id="formVisite" class="form-section">
-            <h1>Aggiungi visite</h1>
+            <h1>VISITE</h1>
             <!--<button type="button" onclick="addForm()">Aggiungi righe</button> -->
             <button type="submit" onclick="aggiungiVisita(event)">Salva</button>
             <button id="submit" onclick="download('visite')">Scarica separati</button>
@@ -749,42 +776,16 @@
                     </tr>
                 </table>
             </form>
-            <form class="dynamic-form form-visite">
-                <table class="table-form">
-                    <tr>
-                        <td> <label for="paziente">Paziente</label> </td>
-                        <td> <input type="text" class="paziente" name="paziente" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="data">Data</label> </td>
-                        <td> <input type="date" class="data" name="data" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="ora">Ora</label> </td>
-                        <td> <input type="text" class="ora" name="ora" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="luogo">Luogo</label> </td>
-                        <td> <input type="text" class="luogo" name="luogo" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="tipoVisita">Tipo Visita</label> </td>
-                        <td> <input type="text" class="tipoVisita" name="tipoVisita" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="note">Note</label> </td>
-                        <td> <input type="text" class="note" name="note"> </td>
-                    </tr>
-                </table>
-            </form>
         </div>
 
         <!-- Form MEDICINE -->
         <div id="formMedicine" class="form-section" style="display:none;">
-            <h1>Aggiungi medicine</h1>
+            <h1>MEDICINE</h1>
             <!-- <button type="button" onclick="addFormMedicina()">Aggiungi righe</button> -->
             <button type="submit" onclick="aggiungiMedicina(event)">Salva</button>
+            <button id="submit" onclick="download('medicine')">Scarica separati</button>
             <button id="submit" onclick="downloadAll('medicine')">Scarica insieme</button>
+
             <form class="dynamic-form form-medicine">
                 <table class="table-form">
                     <tr>
@@ -797,17 +798,38 @@
                     </tr>
                     <tr>
                         <td> <label for="giorno">Data</label> </td>
-                        <td> <input type="text" class="giorno" name="giorno" required> </td>
+                        <td> <select class="giorno" name="giorno" required> </select></td>
                     </tr>
                     <tr>
                         <td> <label for="ora">Ora</label> </td>
-                        <td> <input type="text" class="ora" name="ora" required> </td>
+                        <td> <select class="ora" name="ora" required> </select> </td>
                     </tr>
                     <tr>
                         <td> <label for="note">Note</label> </td>
                         <td> <input type="text" class="note" name="note"> </td>
                     </tr>
                 </table>
+                <script>
+                    // --- SELEZIONI ---
+                    var giornoSelect = document.querySelector('.giorno');
+                    var oraSelect = document.querySelector('.ora');
+
+                    // Popola la select dei giorni
+                    giorni.forEach(function (g) {
+                        var option = document.createElement('option');
+                        option.value = g;
+                        option.textContent = g;
+                        giornoSelect.appendChild(option);
+                    });
+
+                    // Popola la select dell'ora
+                    orari.forEach(function (o) {
+                        var opt = document.createElement('opt');
+                        opt.value = o;
+                        opt.textContent = o;
+                        oraSelect.appendChild(opt);
+                    });
+                </script>
             </form>
             <form class="dynamic-form form-medicine">
                 <table class="table-form">
@@ -821,35 +843,11 @@
                     </tr>
                     <tr>
                         <td> <label for="giorno">Data</label> </td>
-                        <td> <input type="text" class="giorno" name="giorno" required> </td>
+                        <td> <select class="giorno" name="giorno" required></select></td>
                     </tr>
                     <tr>
                         <td> <label for="ora">Ora</label> </td>
-                        <td> <input type="text" class="ora" name="ora" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="note">Note</label> </td>
-                        <td> <input type="text" class="note" name="note"> </td>
-                    </tr>
-                </table>
-            </form>
-            <form class="dynamic-form form-medicine">
-                <table class="table-form">
-                    <tr>
-                        <td> <label for="paziente">Paziente</label> </td>
-                        <td> <input type="text" class="paziente" name="paziente" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="medicina">Medicina</label> </td>
-                        <td> <input type="text" class="medicina" name="medicina" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="giorno">Data</label> </td>
-                        <td> <input type="text" class="giorno" name="giorno" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="ora">Ora</label> </td>
-                        <td> <input type="text" class="ora" name="ora" required> </td>
+                        <td> <select class="ora" name="ora" required></select></td>
                     </tr>
                     <tr>
                         <td> <label for="note">Note</label> </td>
