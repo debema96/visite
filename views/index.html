@@ -800,9 +800,9 @@
                         <td> <label for="giorno">Data</label> </td>
                         <td> <select class="giorno" name="giorno" required> </select></td>
                     </tr>
-                    <tr>
+                     <tr>
                         <td> <label for="ora">Ora</label> </td>
-                        <td> <select class="ora" name="ora" required> </select> </td>
+                        <td> <select class="ora" name="ora" required> </select></td>
                     </tr>
                     <tr>
                         <td> <label for="note">Note</label> </td>
@@ -815,7 +815,7 @@
                     var oraSelect = document.querySelector('.ora');
 
                     // Popola la select dei giorni
-                    giorni.forEach(function (g) {
+                    giorni.forEach(g => {
                         var option = document.createElement('option');
                         option.value = g;
                         option.textContent = g;
@@ -823,37 +823,13 @@
                     });
 
                     // Popola la select dell'ora
-                    orari.forEach(function (o) {
-                        var opt = document.createElement('opt');
+                    orari.forEach(o => {
+                        var option = document.createElement('option');
                         opt.value = o;
                         opt.textContent = o;
-                        oraSelect.appendChild(opt);
+                        oraSelect.appendChild(option);
                     });
                 </script>
-            </form>
-            <form class="dynamic-form form-medicine">
-                <table class="table-form">
-                    <tr>
-                        <td> <label for="paziente">Paziente</label> </td>
-                        <td> <input type="text" class="paziente" name="paziente" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="medicina">Medicina</label> </td>
-                        <td> <input type="text" class="medicina" name="medicina" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="giorno">Data</label> </td>
-                        <td> <select class="giorno" name="giorno" required></select></td>
-                    </tr>
-                    <tr>
-                        <td> <label for="ora">Ora</label> </td>
-                        <td> <select class="ora" name="ora" required></select></td>
-                    </tr>
-                    <tr>
-                        <td> <label for="note">Note</label> </td>
-                        <td> <input type="text" class="note" name="note"> </td>
-                    </tr>
-                </table>
             </form>
         </div>
     </div>
