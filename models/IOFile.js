@@ -22,10 +22,39 @@ class IOFile {
                     console.log("Medicine lette correttamente:", arr.length);
                     return arr;                                                  
                 } else return [];
+            } else if (filePath == "utenti.json") {
+                const fileContent = fs.readFileSync(filePath, "utf-8"); // Legge il file come testo
+                if (fileContent) {
+                    const arr = JSON.parse(fileContent); // Converte il contenuto in JSON
+                    //console.log("Utenti letti correttamente:", arr.length);
+                    return arr;                                                  
+                } else return [];
+            } else  if (filePath == "medicine-test.json") {
+                const fileContent = fs.readFileSync(filePath, "utf-8"); // Legge il file come testo
+                if (fileContent) {
+                    const arr = JSON.parse(fileContent); // Converte il contenuto in JSON
+                    console.log("Medicine test lette correttamente:", arr.length);
+                    return arr;                                                  
+                } else return [];
+            } else  if (filePath == "visite-test.json") {
+                const fileContent = fs.readFileSync(filePath, "utf-8"); // Legge il file come testo
+                if (fileContent) {
+                    const arr = JSON.parse(fileContent); // Converte il contenuto in JSON
+                    console.log("Visite test lette correttamente:", arr.length);
+                    return arr;                                                  
+                } else return [];
+            } else {
+                // Per qualsiasi altro file JSON
+               /* const fileContent = fs.readFileSync(filePath, "utf-8");
+                if (fileContent) {
+                    const arr = JSON.parse(fileContent);
+                    console.log(`File ${filePath} letto correttamente`);
+                    return arr;
+                } else return [];*/
             }
 
         } catch (error) {
-            console.log("Errore nella lettura o conversione del file");
+            console.log("Errore nella lettura o conversione del file:", error);
             return [];
         }
     }
@@ -44,6 +73,16 @@ class IOFile {
              fs.writeFile('medicine.json', jsonData, (err) => {
                 if (err) { console.error('Errore durante la scrittura del file:', err); } 
                     else { console.log('Dati salvati correttamente in medicine.json'); }
+            });
+        } else if (file == "medicine-test") {
+             fs.writeFile('medicine-test.json', jsonData, (err) => {
+                if (err) { console.error('Errore durante la scrittura del file:', err); } 
+                    else { console.log('Dati salvati correttamente in medicine-test.json'); }
+            });
+        } else if (file == "visite-test") {
+             fs.writeFile('visite-test.json', jsonData, (err) => {
+                if (err) { console.error('Errore durante la scrittura del file:', err); } 
+                    else { console.log('Dati salvati correttamente in visite-test.json'); }
             });
         } else console.log ('File non riconosciuto');
     }
