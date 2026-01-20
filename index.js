@@ -5,6 +5,7 @@ const session = require("express-session");
 const path = require("path");
 const IOFile = require("./models/IOFile");  // Importa la classe IOFile
 const VisitaController = require("./controllers/VisitaController");
+const MedicinaController = require("./controllers/MedicinaController");
 const app = express();
 const PORT = 3000;
 
@@ -58,53 +59,127 @@ app.get("/dashboard", isAuthenticated, (req, res) => {
 app.use(express.static(path.join(__dirname, "views")));
 
 // Rotta per leggere i dati dal file
-app.get("/api/read", async (req, res) => {
+app.get("/api/read", isAuthenticated, async (req, res) => {
     try {
-        const fileToRead = req.session.userId === 'test' ? 'visite_test.json' : 'visite.json';
-        var data = await ioFile.readFile(fileToRead);
-        console.log("DATA =>", data);
-        console.log(`RES => Letto da ${fileToRead}, ${data.length} elementi`);
-        res.json(data);
+        const result = await VisitaController.leggiVisite(req.session.userId);
+        if (result.success) {
+            res.json(result.data);
+        } else {
+            res.status(500).json({ error: result.error });
+        }
     } catch (error) {
         console.error("Errore nella lettura:", error);
         res.status(500).json({ error: "Errore nella lettura del file" });
     }
 });
 
-app.get("/api/readmedicine", async (req, res) => {
+app.get("/api/readmedicine", isAuthenticated, async (req, res) => {
     try {
-        const fileToRead = req.session.userId === 'test' ? 'medicine_test.json' : 'medicine.json';
-        var data = await ioFile.readFile(fileToRead);
-        console.log(`RES => Letto da ${fileToRead}, ${data.length} elementi`);
-        res.json(data);
+        const result = await MedicinaController.leggiMedicine(req.session.userId);
+        if (result.success) {
+            res.json(result.data);
+        } else {
+            res.status(500).json({ error: result.error });
+        }
     } catch (error) {
         console.error("Errore nella lettura:", error);
         res.status(500).json({ error: "Errore nella lettura del file" });
+    }
+});
+
+// Nuovi endpoint per operazioni sul backend
+app.post("/api/aggiungi-visita", isAuthenticated, async (req, res) => {
+    try {
+        const result = await VisitaController.aggiungiVisita(req.body, req.session.userId);
+        res.json(result);
+    } catch (error) {
+        console.error("Errore nell'aggiunta della visita:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post("/api/aggiungi-medicina", isAuthenticated, async (req, res) => {
+    try {
+        const result = await MedicinaController.aggiungiMedicina(req.body, req.session.userId);
+        res.json(result);
+    } catch (error) {
+        console.error("Errore nell'aggiunta della medicina:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.get("/api/organizza-visite", isAuthenticated, async (req, res) => {
+    try {
+        const result = await VisitaController.leggiVisite(req.session.userId);
+        if (result.success) {
+            const organizzate = await VisitaController.organizzaPerPaziente(result.data);
+            res.json({ success: true, data: organizzate });
+        } else {
+            res.status(500).json(result);
+        }
+    } catch (error) {
+        console.error("Errore nell'organizzazione delle visite:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.get("/api/organizza-medicine", isAuthenticated, async (req, res) => {
+    try {
+        const result = await MedicinaController.leggiMedicine(req.session.userId);
+        if (result.success) {
+            const organizzate = await MedicinaController.organizzaPerPaziente(result.data);
+            res.json({ success: true, data: organizzate });
+        } else {
+            res.status(500).json(result);
+        }
+    } catch (error) {
+        console.error("Errore nell'organizzazione delle medicine:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
 // Rotta per scrivere i dati nel file
 app.post("/api/writevisite", (req, res) => {
-    const fileToWrite = req.session.userId === 'test' ? 'visite-test' : 'visite';
+    const fileToWrite = req.session.userId === 'test' ? 'visite_test' : 'visite';
     ioFile.writeFile(fileToWrite, req.body);
     console.log(`Visite salvate nel file: ${fileToWrite}`);
     res.send("Dati salvati correttamente!");
 });
 
-app.post("/api/checkdate", async (req, res) => {
+app.post("/api/checkdate", isAuthenticated, async (req, res) => {
     try {
-        const fileToWrite = req.session.userId === 'test' ? 'visite-test' : 'visite';
-        await VisitaController.checkDate(req.body);
-        ioFile.writeFile(fileToWrite, req.body);
+        const fileToWrite = req.session.userId === 'test' ? 'visite_test' : 'visite';
+        const cleanedData = VisitaController.checkDate(req.body);
+        ioFile.writeFile(fileToWrite, cleanedData);
         console.log(`Dati salvati nel file: ${fileToWrite}`);
-        res.send("Dati salvati correttamente!");
+        res.json({ success: true, message: "Date pulite e salvate", data: cleanedData });
     } catch (error) {
-        console.error("Errore durante il checkDate:", error);
-        res.status(500).send("Errore durante il salvataggio");
+        console.error("Errore nel checkDate:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
-app.post("/api/writemedicine", (req, res) => {
+// Endpoint per eliminare una voce
+app.post("/api/elimina-voce", isAuthenticated, async (req, res) => {
+    try {
+        const { tipo, paziente, index } = req.body;
+        
+        if (tipo === "visita") {
+            const result = await VisitaController.eliminaVoce(paziente, index, req.session.userId);
+            res.json(result);
+        } else if (tipo === "medicina") {
+            const result = await MedicinaController.eliminaVoce(paziente, index, req.session.userId);
+            res.json(result);
+        } else {
+            res.status(400).json({ success: false, error: "Tipo non riconosciuto" });
+        }
+    } catch (error) {
+        console.error("Errore nell'eliminazione:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post("/api/writemedicine", isAuthenticated, (req, res) => {
     ioFile.writeFile("medicine",req.body);  // Uso corretto dell'istanza
     res.send("Dati salvati correttamente!");
 });

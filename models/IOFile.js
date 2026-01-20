@@ -29,14 +29,14 @@ class IOFile {
                     //console.log("Utenti letti correttamente:", arr.length);
                     return arr;                                                  
                 } else return [];
-            } else  if (filePath == "medicine-test.json") {
+            } else  if (filePath == "medicine_test.json") {
                 const fileContent = fs.readFileSync(filePath, "utf-8"); // Legge il file come testo
                 if (fileContent) {
                     const arr = JSON.parse(fileContent); // Converte il contenuto in JSON
                     console.log("Medicine test lette correttamente:", arr.length);
                     return arr;                                                  
                 } else return [];
-            } else  if (filePath == "visite-test.json") {
+            } else  if (filePath == "visite_test.json") {
                 const fileContent = fs.readFileSync(filePath, "utf-8"); // Legge il file come testo
                 if (fileContent) {
                     const arr = JSON.parse(fileContent); // Converte il contenuto in JSON
@@ -74,13 +74,13 @@ class IOFile {
                 if (err) { console.error('Errore durante la scrittura del file:', err); } 
                     else { console.log('Dati salvati correttamente in medicine.json'); }
             });
-        } else if (file == "medicine-test") {
-             fs.writeFile('medicine-test.json', jsonData, (err) => {
+        } else if (file == "medicine_test") {
+             fs.writeFile('medicine_test.json', jsonData, (err) => {
                 if (err) { console.error('Errore durante la scrittura del file:', err); } 
                     else { console.log('Dati salvati correttamente in medicine-test.json'); }
             });
-        } else if (file == "visite-test") {
-             fs.writeFile('visite-test.json', jsonData, (err) => {
+        } else if (file == "visite_test") {
+             fs.writeFile('visite_test.json', jsonData, (err) => {
                 if (err) { console.error('Errore durante la scrittura del file:', err); } 
                     else { console.log('Dati salvati correttamente in visite-test.json'); }
             });

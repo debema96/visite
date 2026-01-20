@@ -64,6 +64,7 @@
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="services.js"></script>
     <script>
         var arr;
         var med;
@@ -76,8 +77,6 @@
         var righe;
         var doc;
         const { jsPDF } = window.jspdf;
-        const giorni = ["lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica", "tutti i giorni", "giorni alterni"];
-        const orari = ["colazione", "metà mattina", "pranzo", "metà pomeriggio", "cena"];
         // VISITA CONTROLLER START
         const parseTime = async (str) => {
             const [h, min, s = 0] = str.split(":").map(Number);
@@ -201,105 +200,6 @@
             }
         };
         // VISITA CONTROLLER END
-        var riordinaPerData = async (array) => {
-            array.sort((a, b) => {
-                a.PAZIENTE = a.PAZIENTE.toLowerCase();
-                return parseDate(a.DATA) - parseDate(b.DATA);
-            });
-            return array;
-        };
-
-        var riordinaMedicine = async (array) => {
-            var a = {};
-
-            array.forEach(e => {
-                a.p[e.PAZIENTE] += e;
-            })
-
-            console.log("a =>", a);
-            return a;
-        }
-
-        var riordinaPerGiorno = async (arr) => {
-            var res = [];
-            //colazione, metà mattina, pranzo, metà pomeriggio, cena
-            orari.forEach(o => {
-                arr.forEach(a => {
-                    if (a.ORA == o)
-                        res.push(a);
-                });
-            });
-
-            arr.forEach(esc => {
-                if (!res.includes(esc))
-                    res.push(esc);
-            });
-
-            return res;
-        };
-
-        var riordinaPerGiornoOld = async (arr) => {
-            let res = [];
-            arr.forEach(el => {
-                //console.log("GIORNO => ", el.GIORNO);
-                if (!giorniOrdinati.includes(el.GIORNO)) {
-                    res.push(el);
-                }
-            });
-            //ordino per orario tutti quelli che non sono di un giorno preciso
-            res = res.sort((a, b) => {
-                //console.log("a => ", a.ORA, " b =>", b.ORA);
-                parseTime(a.ORA) - parseTime(b.ORA); // confronto per ora
-            });
-            //ora metto in ordine per giorno e poi orario
-            var a;
-            giorniOrdinati.forEach(gg => {
-                a = [];
-                arr.forEach(el => {
-                    if (giorniOrdinati.includes(el.GIORNO)) {
-                        //console.log("GG => ", gg, " GIORNO => ", el.GIORNO)
-                        if (gg == el.GIORNO) {
-                            a.push(el);
-                        }
-                    };
-                });
-                a = a.sort((c, b) => {
-                    console.log("C => ", c.ORA, " B => ", b.ORA);
-                    parseTime(c.ORA) - parseTime(b.ORA); // confronto per ora
-                });
-                a.forEach(e => {
-                    res.push(e);
-                    //console.log("push finale")
-                })
-            });
-            //console.log("res 3 ->", res.length)
-            return res;
-        };
-
-        var writeFile = async (arr) => {
-            //console.log("arr.length 2 =>", arr.length);
-            fetch("/api/writevisite", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(arr)
-            })
-                .then(response => response.text())
-                .then(msg => alert(msg))
-                .catch(err => console.error("Errore:", err));
-        };
-
-        var writeMedicine = async (arr) => {
-            //console.log("salvo medicine =>", arr.length);
-            fetch("/api/writemedicine", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(arr)
-            })
-                .then(response => response.text())
-                .then(msg => alert(msg))
-                .catch(err => console.error("Errore:", err));
-        };
-
         var addForm = async () => {
             let formContainer = document.getElementById("formContainer");
             let originalForm = document.querySelector(".dynamic-form");
@@ -332,166 +232,151 @@
         };
 
         var aggiungiMedicina = async (event) => {
-            event.preventDefault(); // Previene l'invio del form
+            event.preventDefault();
             let formMedicine = document.querySelectorAll(".form-medicine");
 
-            var sizeBEF = med.length;
-            formMedicine.forEach((form, index) => {
-                //console.log("FORM =>", form)
+            for (let form of formMedicine) {
                 var paziente = form.querySelector(".paziente").value;
                 var medicina = form.querySelector(".medicina").value;
                 var giorno = form.querySelector(".giorno").value;
                 var ora = form.querySelector(".ora").value;
                 var note = form.querySelector(".note").value;
-                //console.log("form medicina =>", paziente, medicina, giorno, ora, note);
-                if (paziente == "" && medicina == "" && ora == "" && giorno == "" && note == "") {
-                    console.log("non hai compilato nessun campo!");
-                    return;
-                } else {
-                    med.push(
-                        {
-                            PAZIENTE: paziente.toLowerCase(),
-                            MEDICINA: medicina.toLowerCase() == "" ? " " : medicina.toLowerCase(),
-                            GIORNO: giorno,
-                            ORA: ora,
-                            NOTE: note.toLowerCase() == "" ? " " : note.toLowerCase()
-                        });
-                    form.reset();
+
+                if (!paziente && !medicina && !giorno && !ora && !note) {
+                    continue; // Salta i form vuoti
                 }
-            });
-            med = await riordinaMedicine(med);
-            var sizeAFT = med.length;
-            if (sizeBEF != sizeAFT) {
-                writeMedicine(med);
+
+                const medicinaData = {
+                    paziente: paziente,
+                    medicina: medicina,
+                    giorno: giorno,
+                    ora: ora,
+                    note: note
+                };
+
+                try {
+                    const result = await apiService.aggiungiMedicina(medicinaData);
+                    if (result.success) {
+                        form.reset();
+                    } else {
+                        alert("Errore: " + result.error);
+                    }
+                } catch (error) {
+                    console.error("Errore:", error);
+                    alert("Errore nell'aggiunta della medicina");
+                }
             }
-            //console.log(med);
 
             await leggiMedicine();
-            //alert("Visite aggiornate con successo.");
         };
-
         var aggiungiVisita = async (event) => {
-            event.preventDefault(); // Previene l'invio del form
+            event.preventDefault();
             let formVisite = document.querySelectorAll(".form-visite");
 
-            var sizeBEF = arr.length;
-            formVisite.forEach((form, index) => {
+            for (let form of formVisite) {
                 let paziente = form.querySelector(".paziente").value;
                 let data = form.querySelector(".data").value;
                 let ora = form.querySelector(".ora").value;
                 let luogo = form.querySelector(".luogo").value;
                 let tipoVisita = form.querySelector(".tipoVisita").value;
                 let note = form.querySelector(".note").value;
-                //console.log("form =>", paziente, data, ora, luogo, tipoVisita, note);
-                if (paziente == "" && ora == "" && luogo == "" && tipoVisita == "" && note == "") {
-                    console.log("non hai compilato nessun campo!");
-                    return;
-                } else {
-                    let day = data.split("-")[2];
-                    let month = data.split("-")[1];
-                    let year = data.split("-")[0].split("")[2] + "" + data.split("-")[0].split("")[3];
-                    data = day + "/" + month + "/" + year;
 
-                    if (/^(?:[0-9]|1\d|2[0-3]):[0-5]\d$/.test(ora)) {
-                        //console.log("orario ok: ", ora)
-                    } else if (/^(?:[0-9]|1\d|2[0-3]).[0-5]\d$/.test(ora)) {
-                        ora = ora.replaceAll(".", ":");
-                    }
-                    arr.push(
-                        {
-                            PAZIENTE: paziente.toLowerCase(),
-                            DATA: data,
-                            ORA: ora,
-                            LUOGO: luogo.toLowerCase() == "" ? " " : luogo.toLowerCase(),
-                            TIPO_VISITA: tipoVisita.toLowerCase() == "" ? " " : tipoVisita.toLowerCase(),
-                            NOTE: note.toLowerCase() == "" ? " " : note.toLowerCase()
-                        });
-                    form.reset();
+                if (!paziente && !data && !ora && !luogo && !tipoVisita && !note) {
+                    continue; // Salta i form vuoti
                 }
-            });
-            var sizeAFT = arr.length;
-            if (sizeBEF != sizeAFT) {
-                writeFile(arr);
+
+                const visita = {
+                    paziente: paziente,
+                    data: data,
+                    ora: ora,
+                    luogo: luogo,
+                    tipoVisita: tipoVisita,
+                    note: note
+                };
+
+                try {
+                    const result = await apiService.aggiungiVisita(visita);
+                    if (result.success) {
+                        form.reset();
+                    } else {
+                        alert("Errore: " + result.error);
+                    }
+                } catch (error) {
+                    console.error("Errore:", error);
+                    alert("Errore nell'aggiunta della visita");
+                }
             }
-            //console.log(arr);
 
             await leggiVisite();
-            //alert("Visite aggiornate con successo.");
         };
 
         var createTableFromArray = async (ar) => {
-            if (ar && Array.isArray(ar) && ar.length > 0) {
-                //RIORDINO ARRAY PER DATA
-                if (ar[0].DATA) ar = await riordinaPerData(ar);
+            const tableContainer = document.getElementById("tableContainer");
+            tableContainer.innerHTML = ""; // Svuota il contenitore
 
-                //console.log(ar);
-
-                var table = document.createElement("table");
-                var thead = document.createElement("thead");
-                var tbody = document.createElement("tbody");
-
-                // Aggiungi intestazioni
-                var headers = Object.keys(ar[0]);
-                var headerRow = document.createElement("tr");
-                headers.forEach(header => {
-                    var th = document.createElement("th");
-                    th.textContent = header;
-                    headerRow.appendChild(th);
-                });
-                thead.appendChild(headerRow);
-
-                // Aggiungi righe di dati
-                ar.forEach(row => {
-                    var dataRow = document.createElement("tr");
-                    headers.forEach(header => {
-                        var td = document.createElement("td");
-                        td.textContent = row[header];
-                        dataRow.appendChild(td);
-                    });
-                    tbody.appendChild(dataRow);
-                });
-
-                table.appendChild(thead);
-                table.appendChild(tbody);
-                const tableContainer = document.getElementById("tableContainer");
-                tableContainer.innerHTML = ""; // Svuota il contenitore
-                tableContainer.appendChild(table); // Aggiungi la tabella al DOM
-            } else {
-                console.log("File visite.json vuoto");
+            if (!ar || !Array.isArray(ar) || ar.length === 0) {
+                // Mostra messaggio se file vuoto
+                const emptyMsg = document.createElement("div");
+                emptyMsg.style.cssText = "text-align: center; padding: 40px; font-size: 18px; color: #999;";
+                emptyMsg.textContent = "Non ci sono ancora dati salvati.";
+                tableContainer.appendChild(emptyMsg);
+                return;
             }
-            //return table;
+
+            var table = document.createElement("table");
+            var thead = document.createElement("thead");
+            var tbody = document.createElement("tbody");
+
+            // Aggiungi intestazioni
+            var headers = Object.keys(ar[0]);
+            headers.push("Azioni"); // Aggiungi colonna azioni
+            var headerRow = document.createElement("tr");
+            headers.forEach(header => {
+                var th = document.createElement("th");
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            // Aggiungi righe di dati
+            ar.forEach((row, index) => {
+                var dataRow = document.createElement("tr");
+                Object.keys(ar[0]).forEach(header => {
+                    var td = document.createElement("td");
+                    td.textContent = row[header];
+                    dataRow.appendChild(td);
+                });
+                
+                // Aggiungi bottone elimina
+                var actionTd = document.createElement("td");
+                var deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "✕";
+                deleteBtn.style.cssText = "background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-weight: bold;";
+                deleteBtn.onclick = () => eliminaVoce(ar, index);
+                actionTd.appendChild(deleteBtn);
+                dataRow.appendChild(actionTd);
+                
+                tbody.appendChild(dataRow);
+            });
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            tableContainer.appendChild(table);
         }
 
         var checkDate = async (arr) => {
-            let now = new Date();
-            let month = now.getMonth() + 1;
-            now = now.getDate() + "/" + month + "/" + now.getFullYear();
-            let anno;
-            let mese;
-            let giorno;
             try {
-                arr.forEach(e => {
-                    anno = Number(e.DATA.split("/")[2]);
-                    mese = Number(e.DATA.split("/")[1]);
-                    giorno = Number(e.DATA.split("/")[0]);
-                    if (anno < Number(now.split("/")[2].slice(2)) ||
-                        (anno == Number(now.split("/")[2].slice(2)) && mese < Number(now.split("/")[1])) ||
-                        (anno == Number(now.split("/")[2].slice(2)) && mese == Number(now.split("/")[1]) && giorno < Number(now.split("/")[0]))) {
-                        old.push(e);
-                    };
-                });
-                //console.log("OLD =>", old);
-                if (old && Array.isArray(old) && old.length > 0) {
-                    arr = arr.filter(el => !old.includes(el));
-                };
-                //console.log("arr.length =>", arr.length);
-                //console.log("oldFile =>", oldFile);
-                //console.log("old =>", old);
-                await writeFile(arr);
-            } catch (er) {
-                console.log("Errore nella pulizia delle date");
+                const result = await apiService.pulisciDate(arr);
+                if (result.success) {
+                    alert("Date vecchie pulite e salvate!");
+                    await leggiVisite();
+                } else {
+                    alert("Errore: " + result.error);
+                }
+            } catch (error) {
+                console.error("Errore nella pulizia delle date:", error);
+                alert("Errore nella pulizia delle date");
             }
-            await leggiFile();
         }
         /*        var leggiOld = async () => {
                                 fetch("/api/readstorico", {
@@ -506,123 +391,62 @@
 
         var leggiVisite = async () => {
             try {
-                const response = await fetch("/api/read", {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" }
-                });
-                if (!response.ok) {
-                    console.log("Errore lettura file");
-                    //throw new Error(`Errore HTTP! Status: ${response.status}`);
-                }
-                arr = await response.json();
-                //console.log("read length =>", arr.length);
+                arr = await apiService.leggiVisite();
+                tab = await apiService.organizzaVisite();
 
                 if (arr && Array.isArray(arr) && arr.length > 0) {
-
-
-                    arr.forEach(el => {
-                        if (!pazienti.includes(el.PAZIENTE)) pazienti.push(el.PAZIENTE);
-                    });
-                    await pazienti.forEach(a => {
-                        tab[a] = [];
-                    });
-
-                    arr.forEach(b => {
-                        Object.keys(tab).forEach(a => {
-                            if (a == b.PAZIENTE) {
-                                tab[a].push(b);
-                            };
-                        });
-                    });
-
-                    await Object.keys(tab).forEach(async c => {
-                        tab[c] = await riordinaPerData(tab[c]);
-                    })
-
-                    //console.log("TAB =>", JSON.stringify(tab));
-
                     if (Object.keys(tab).length == 1) {
-                        //console.log("1 PAZIENTE");
                         await createTableFromArray(arr);
                     } else {
-                        //console.log("PIU PAZIENTI");
-                        await createTables(tab);
+                        await createTables(tab, 'visita');
                     }
-
-                } else console.log("file vuoto");
+                } else {
+                    console.log("file vuoto");
+                    alert("Nessuna visita trovata");
+                }
             } catch (err) {
                 console.error("Errore durante la lettura del file:", err);
-                return null; // Valore di fallback in caso di errore
+                alert("Errore nella lettura del file");
             }
         };
 
         var leggiMedicine = async () => {
             try {
-                const response = await fetch("/api/readmedicine", {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" }
-                });
-                if (!response.ok) {
-                    console.log("Errore lettura file");
-                    //throw new Error(`Errore HTTP! Status: ${response.status}`);
-                }
-                med = await response.json();
-                console.log("medicine lette =>", med.length);
+                med = await apiService.leggiMedicine();
+                tabMed = await apiService.organizzaMedicine();
 
                 if (med && Array.isArray(med) && med.length > 0) {
-
-
-                    med.forEach(el => {
-                        if (!medicine.includes(el.PAZIENTE)) medicine.push(el.PAZIENTE);
-                    });
-                    await medicine.forEach(a => {
-                        tabMed[a] = [];
-                    });
-
-                    med.forEach(b => {
-                        Object.keys(tabMed).forEach(a => {
-                            if (a == b.PAZIENTE) {
-                                tabMed[a].push(b);
-                            };
-                        });
-                    });
-
-                    /*await Object.keys(tab).forEach(async c => {
-                        tab[c] = await riordinaPerData(tab[c]);
-                    })*/
-
                     if (Object.keys(tabMed).length == 1) {
                         await createTableFromArray(med);
                     } else {
-                        await createTables(tabMed);
+                        await createTables(tabMed, 'medicina');
                     }
-
-                } else console.log("file vuoto");
+                } else {
+                    console.log("file vuoto");
+                    alert("Nessuna medicina trovata");
+                }
             } catch (err) {
                 console.error("Errore durante la lettura del file:", err);
-                return null; // Valore di fallback in caso di errore
+                alert("Errore nella lettura del file");
             }
         };
 
-        var createTables = async (tab) => {
+        var createTables = async (tab, tipo) => {
             const container = document.getElementById('tableContainer');
             container.innerHTML = ""; // Svuota il contenitore
 
+            let hasData = false;
             Object.entries(tab).forEach(([key, array]) => {
                 if (array.length === 0) return;
+                hasData = true;
 
                 const table = document.createElement("table");
                 const thead = document.createElement("thead");
                 const tbody = document.createElement("tbody");
 
-                // Aggiungi titolo
-                /*const title = document.createElement("div");
-                title.className = "table-title";
-                title.textContent = key;
-                container.appendChild(title);*/
-
                 // Aggiungi intestazioni
                 const headers = Object.keys(array[0]);
+                headers.push("Azioni"); // Aggiungi colonna azioni
                 const headerRow = document.createElement("tr");
                 headers.forEach(header => {
                     const th = document.createElement("th");
@@ -632,13 +456,23 @@
                 thead.appendChild(headerRow);
 
                 // Aggiungi righe di dati
-                array.forEach(row => {
+                array.forEach((row, index) => {
                     const dataRow = document.createElement("tr");
-                    headers.forEach(header => {
+                    Object.keys(array[0]).forEach(header => {
                         const td = document.createElement("td");
                         td.textContent = row[header];
                         dataRow.appendChild(td);
                     });
+                    
+                    // Aggiungi bottone elimina
+                    const actionTd = document.createElement("td");
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.textContent = "✕";
+                    deleteBtn.style.cssText = "background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-weight: bold;";
+                    deleteBtn.onclick = () => eliminaVocePerPaziente(key, index, tipo);
+                    actionTd.appendChild(deleteBtn);
+                    dataRow.appendChild(actionTd);
+                    
                     tbody.appendChild(dataRow);
                 });
 
@@ -646,16 +480,80 @@
                 table.appendChild(tbody);
                 container.appendChild(table);
             });
+
+            // Se non c'è nessun dato, mostra messaggio
+            if (!hasData) {
+                const emptyMsg = document.createElement("div");
+                emptyMsg.style.cssText = "text-align: center; padding: 40px; font-size: 18px; color: #999;";
+                emptyMsg.textContent = "Non ci sono ancora dati salvati.";
+                container.appendChild(emptyMsg);
+            }
+        }
+
+        // Funzione per eliminare una voce da una tabella con più pazienti
+        var eliminaVocePerPaziente = async (paziente, index, tipo) => {
+            if (confirm("Sei sicuro di voler eliminare questa voce?")) {
+                try {
+                    const result = await apiService.eliminaVoce(tipo, paziente, index);
+                    if (result.success) {
+                        if (tipo === 'visita') {
+                            await leggiVisite();
+                        } else if (tipo === 'medicina') {
+                            await leggiMedicine();
+                        }
+                    } else {
+                        alert("Errore: " + result.error);
+                    }
+                } catch (error) {
+                    console.error("Errore nell'eliminazione:", error);
+                    alert("Errore nell'eliminazione della voce");
+                }
+            }
+        }
+
+        // Funzione per eliminare una voce
+        var eliminaVoce = async (array, index) => {
+            if (confirm("Sei sicuro di voler eliminare questa voce?")) {
+                // Determina il tipo (visite o medicine)
+                const isVisite = arr && arr === array;
+                const tipo = isVisite ? "visita" : "medicina";
+                
+                // Prendi il paziente dalla voce da eliminare
+                const voce = array[index];
+                const paziente = voce.PAZIENTE;
+                
+                try {
+                    const result = await apiService.eliminaVoce(tipo, paziente, index);
+                    if (result.success) {
+                        if (isVisite) {
+                            await leggiVisite();
+                        } else {
+                            await leggiMedicine();
+                        }
+                    } else {
+                        alert("Errore: " + result.error);
+                    }
+                } catch (error) {
+                    console.error("Errore nell'eliminazione:", error);
+                    alert("Errore nell'eliminazione della voce");
+                }
+            }
         }
 
         var mostraVisite = async () => {
             document.getElementById('formVisite').style.display = 'block';
             document.getElementById('formMedicine').style.display = 'none';
+            document.getElementById('checkDate').style.display = 'inline-block'; // Mostra pulisci date
+            
+            // Nascondi il bottone salva medicine
+            const saveMedBtn = document.getElementById('saveMed');
+            if (saveMedBtn) saveMedBtn.style.display = 'none';
         }
 
         var mostraMedicine = async () => {
             document.getElementById('formVisite').style.display = 'none';
             document.getElementById('formMedicine').style.display = 'block';
+            document.getElementById('checkDate').style.display = 'none'; // Nascondi pulisci date
         }
 
     </script>
@@ -874,68 +772,31 @@
                 </table>
                 <script>
                     // --- SELEZIONI ---
-                    var giornoSelect = document.querySelector('.giorno');
-                    var oraSelect = document.querySelector('.ora');
+                    var giorniSelects = document.querySelectorAll('.giorno');
+                    var oraSelects = document.querySelectorAll('.ora');
 
-                    // Popola la select dei giorni
-                    giorni.forEach(g => {
-                        var option = document.createElement('option');
-                        option.value = g;
-                        option.textContent = g;
-                        giornoSelect.appendChild(option);
+                    // Definisci giorni e orari secondo l'ordinamento
+                    const giorni = ["tutti i giorni", "giorni alterni", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"];
+                    const orari = ["colazione", "metà mattina", "pranzo", "metà pomeriggio", "cena"];
+
+                    // Popola tutti i select dei giorni
+                    giorniSelects.forEach(giornoSelect => {
+                        giorni.forEach(g => {
+                            var option = document.createElement('option');
+                            option.value = g;
+                            option.textContent = g;
+                            giornoSelect.appendChild(option);
+                        });
                     });
 
-                    // Popola la select dell'ora
-                    orari.forEach(o => {
-                        var option = document.createElement('option');
-                        opt.value = o;
-                        opt.textContent = o;
-                        oraSelect.appendChild(option);
-                    });
-                </script>
-            </form>
-            <form class="dynamic-form form-medicine">
-                <table class="table-form">
-                    <tr>
-                        <td> <label for="paziente">Paziente</label> </td>
-                        <td> <input type="text" class="paziente" name="paziente" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="medicina">Medicina</label> </td>
-                        <td> <input type="text" class="medicina" name="medicina" required> </td>
-                    </tr>
-                    <tr>
-                        <td> <label for="giorno">Data</label> </td>
-                        <td> <select class="giorno" name="giorno" required> </select></td>
-                    </tr>
-                    <tr>
-                        <td> <label for="ora">Ora</label> </td>
-                        <td> <select class="ora" name="ora" required> </select></td>
-                    </tr>
-                    <tr>
-                        <td> <label for="note">Note</label> </td>
-                        <td> <input type="text" class="note" name="note"> </td>
-                    </tr>
-                </table>
-                <script>
-                    // --- SELEZIONI ---
-                    var giornoSelect = document.querySelector('.giorno');
-                    var oraSelect = document.querySelector('.ora');
-
-                    // Popola la select dei giorni
-                    giorni.forEach(g => {
-                        var option = document.createElement('option');
-                        option.value = g;
-                        option.textContent = g;
-                        giornoSelect.appendChild(option);
-                    });
-
-                    // Popola la select dell'ora
-                    orari.forEach(o => {
-                        var option = document.createElement('option');
-                        opt.value = o;
-                        opt.textContent = o;
-                        oraSelect.appendChild(option);
+                    // Popola tutti i select dell'ora
+                    oraSelects.forEach(oraSelect => {
+                        orari.forEach(o => {
+                            var option = document.createElement('option');
+                            option.value = o;
+                            option.textContent = o;
+                            oraSelect.appendChild(option);
+                        });
                     });
                 </script>
             </form>

@@ -1,13 +1,5 @@
 [
   {
-    "PAZIENTE": "debora",
-    "DATA": "28/03/25",
-    "ORA": "12.12",
-    "LUOGO": "1",
-    "TIPO_VISITA": "1",
-    "NOTE": "1"
-  },
-  {
     "PAZIENTE": "patrizia",
     "DATA": "20/03/25",
     "ORA": "12.12",
@@ -22,14 +14,6 @@
     "LUOGO": "1",
     "TIPO_VISITA": "1",
     "NOTE": "1"
-  },
-  {
-    "PAZIENTE": "gabriele",
-    "DATA": "29/03/25",
-    "ORA": "22.22",
-    "LUOGO": "3",
-    "TIPO_VISITA": "3",
-    "NOTE": "3"
   },
   {
     "PAZIENTE": "patrizia",
@@ -49,26 +33,10 @@
   },
   {
     "PAZIENTE": "debora",
-    "DATA": "18/07/25",
-    "ORA": "09.30",
-    "LUOGO": "lodi",
-    "TIPO_VISITA": "dentista",
-    "NOTE": " "
-  },
-  {
-    "PAZIENTE": "debora",
-    "DATA": "21/03/25",
-    "ORA": "22.00",
-    "LUOGO": "lodi",
-    "TIPO_VISITA": "ginecologa",
-    "NOTE": " "
-  },
-  {
-    "PAZIENTE": "gabriele",
-    "DATA": "05/04/25",
-    "ORA": "13.13",
-    "LUOGO": "milano",
-    "TIPO_VISITA": "test",
-    "NOTE": "ciao questo è un test di lunghezza"
+    "DATA": "22/01/26",
+    "ORA": "22:00",
+    "LUOGO": "casa",
+    "TIPO_VISITA": "boh",
+    "NOTE": "test"
   }
 ]
