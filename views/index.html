@@ -20,7 +20,7 @@
         const { jsPDF } = window.jspdf;
         const giorni = ["lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica", "tutti i giorni", "giorni alterni"];
         const orari = ["colazione", "metà mattina", "pranzo", "metà pomeriggio", "cena"];
-
+// VISITA CONTROLLER START
         const parseTime = async (str) => {
             const [h, min, s = 0] = str.split(":").map(Number);
             return h * 3600 + min * 60 + s; // converte tutto in secondi
@@ -142,7 +142,7 @@
                 alert("Impossibile scaricare il nulla");
             }
         };
-
+// VISITA CONTROLLER END
         var riordinaPerData = async (array) => {
             array.sort((a, b) => {
                 a.PAZIENTE = a.PAZIENTE.toLowerCase();
@@ -150,6 +150,17 @@
             });
             return array;
         };
+
+        var riordinaMedicine = async (array) => {
+            var a = {};
+            
+            array.forEach(e => {
+                a.p[e.PAZIENTE] += e;
+            })
+
+            console.log("a =>", a);
+            return a;
+        }
 
         var riordinaPerGiorno = async (arr) => {
             var res = [];
@@ -279,14 +290,6 @@
                     console.log("non hai compilato nessun campo!");
                     return;
                 } else {
-                    /* if (/^(?:[01]?\d|2[0-3])[:.][0-5]\d$/.test(ora) || ora == '24.00' || ora == '24:00') {
-                         ora = ora.replaceAll(".", ":");
-                         if (ora.split(":")[0].length == 1) {
-                             ora = '0' + ora;
-                         }
-                     } else if (ora.length < 3 && !ora.includes(":") && !ora.includes(".")) {
-                         ora = ora + ':00';
-                     } else { ora = "" }*/
                     med.push(
                         {
                             PAZIENTE: paziente.toLowerCase(),
@@ -298,7 +301,7 @@
                     form.reset();
                 }
             });
-            med = await riordinaPerGiorno(med);
+            med = await riordinaMedicine(med);
             var sizeAFT = med.length;
             if (sizeBEF != sizeAFT) {
                 writeMedicine(med);

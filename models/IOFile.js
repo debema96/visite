@@ -45,7 +45,7 @@ class IOFile {
                 if (err) { console.error('Errore durante la scrittura del file:', err); } 
                     else { console.log('Dati salvati correttamente in medicine.json'); }
             });
-        }
+        } else console.log ('File non riconosciuto');
     }
 
 

@@ -3,15 +3,8 @@ const IOFile = require("../models/IOFile");
 const fs = require("fs");
 
 var MedicinaController = {
-    
-    /*checkDate: (arr) => {
-        const giorniOrdinati = ["lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"];
-        arr.forEach(el => {
-            el
-        });
-    },*/
 
-    writeFile: (path, lines) => {
+    writeFile : (path, lines) => {
         IOFile.writeFile(path, lines);
     }
 }

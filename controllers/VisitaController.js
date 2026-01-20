@@ -36,36 +36,7 @@ var VisitaController = {
 
     writeFile: (path, lines) => {
         IOFile.writeFile(path, lines);
-    }/*,
-
-
-    addVisita: (visite, nuovaVisita) => {
-        visita.addVisita(visite, nuovaVisita);
-    },*/
-
-    /*writeFileOld: () => {
-        console.log("oldFile =>", oldFile);
-        console.log("old =>", old);
-        console.log("oldFile.length =>", oldFile.length);
-        if (old && Array.isArray(old) && old.length > 0) {
-            old.forEach(ele => {
-                oldFile.push(ele);
-            });
-        };
-
-        console.log("oldFile.length 2 =>", oldFile.length);
-        oldFile = oldFile.filter(el => !old.includes(el));
-        console.log("oldFile.length 3 =>", oldFile.length);
-
-        fetch("/api/writestorico", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(oldFile)
-        })
-            .then(response => response.text())
-            .then(msg => alert(msg))
-            .catch(err => console.error("Errore:", err));
-    }*/
+    }
 }
 
 module.exports = VisitaController
