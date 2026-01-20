@@ -62,6 +62,7 @@ app.get("/api/read", async (req, res) => {
     try {
         const fileToRead = req.session.userId === 'test' ? 'visite_test.json' : 'visite.json';
         var data = await ioFile.readFile(fileToRead);
+        console.log("DATA =>", data);
         console.log(`RES => Letto da ${fileToRead}, ${data.length} elementi`);
         res.json(data);
     } catch (error) {
@@ -124,7 +125,6 @@ app.post("/login", async (req, res) => {
         // Leggi il file degli utenti
         const utenti = await ioFile.readFile("utenti.json");
 
-        console.log("utente => ", username, password);
         // Cerca l'utente
         const utenteValido = utenti.find(u => u.utente === username && u.pw === password);
 

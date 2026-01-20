@@ -36,6 +36,28 @@
             background: #c0392b;
         }
 
+        .action-btn {
+            background: #34495e;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.3s;
+            margin: 2px;
+        }
+
+        .action-btn:hover {
+            background: #2c3e50;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
         .user-info {
             font-size: 14px;
         }
@@ -56,7 +78,7 @@
         const { jsPDF } = window.jspdf;
         const giorni = ["lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica", "tutti i giorni", "giorni alterni"];
         const orari = ["colazione", "metà mattina", "pranzo", "metà pomeriggio", "cena"];
-// VISITA CONTROLLER START
+        // VISITA CONTROLLER START
         const parseTime = async (str) => {
             const [h, min, s = 0] = str.split(":").map(Number);
             return h * 3600 + min * 60 + s; // converte tutto in secondi
@@ -178,7 +200,7 @@
                 alert("Impossibile scaricare il nulla");
             }
         };
-// VISITA CONTROLLER END
+        // VISITA CONTROLLER END
         var riordinaPerData = async (array) => {
             array.sort((a, b) => {
                 a.PAZIENTE = a.PAZIENTE.toLowerCase();
@@ -189,7 +211,7 @@
 
         var riordinaMedicine = async (array) => {
             var a = {};
-            
+
             array.forEach(e => {
                 a.p[e.PAZIENTE] += e;
             })
@@ -739,11 +761,13 @@
 
 <body>
     <div class="sinistra">
-        <div class="alto">
+        <div class="header-top" class="alto" style="display: flex; gap: 15px; align-items: center;">
             <h1>Casa Chiesa
-                <button type="button" class="leggi" onclick="leggiVisite(), mostraVisite()">Leggi visite</button>
-                <button type="button" class="leggi" onclick="leggiMedicine(), mostraMedicine()">Leggi medicine</button>
-                <button id="checkDate" onclick="checkDate(arr)">Pulisci date vecchie e Salva</button>
+                <button type="button" class="action-btn" onclick="leggiVisite(), mostraVisite()">Leggi visite</button>
+                <button type="button" class="action-btn" onclick="leggiMedicine(), mostraMedicine()">Leggi medicine</button>
+                <button id="checkDate" class="action-btn" onclick="checkDate(arr)" style="display: none;">Pulisci date vecchie e Salva</button>
+                <span class="user-info" id="userInfo">Utente: <strong id="currentUser">-</strong></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </h1>
         </div>
         <div class="basso">
@@ -752,22 +776,13 @@
     </div>
 
     <div class="destra">
-        <!-- Header con logout -->
-        <div class="header-top">
-            <h2>Gestione Visite Mediche</h2>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <span class="user-info" id="userInfo">Utente: <strong id="currentUser">-</strong></span>
-                <button class="logout-btn" onclick="logout()">Logout</button>
-            </div>
-        </div>
-
         <!-- Form VISITE -->
         <div id="formVisite" class="form-section">
             <h1>VISITE</h1>
             <!--<button type="button" onclick="addForm()">Aggiungi righe</button> -->
-            <button type="submit" onclick="aggiungiVisita(event)">Salva</button>
-            <button id="submit" onclick="download('visite')">Scarica separati</button>
-            <button id="submit" onclick="downloadAll('visite')">Scarica insieme</button>
+            <button type="submit" class="action-btn" onclick="aggiungiVisita(event)">Salva</button>
+            <button class="action-btn" onclick="download('visite')">Scarica separati</button>
+            <button class="action-btn" onclick="downloadAll('visite')">Scarica insieme</button>
             <form class="dynamic-form form-visite">
                 <table class="table-form">
                     <tr>
@@ -830,9 +845,9 @@
         <div id="formMedicine" class="form-section" style="display:none;">
             <h1>MEDICINE</h1>
             <!-- <button type="button" onclick="addFormMedicina()">Aggiungi righe</button> -->
-            <button type="submit" onclick="aggiungiMedicina(event)">Salva</button>
-            <button id="submit" onclick="download('medicine')">Scarica separati</button>
-            <button id="submit" onclick="downloadAll('medicine')">Scarica insieme</button>
+            <button type="submit" class="action-btn" onclick="aggiungiMedicina(event)">Salva</button>
+            <button class="action-btn" onclick="download('medicine')">Scarica separati</button>
+            <button class="action-btn" onclick="downloadAll('medicine')">Scarica insieme</button>
 
             <form class="dynamic-form form-medicine">
                 <table class="table-form">
@@ -848,7 +863,52 @@
                         <td> <label for="giorno">Data</label> </td>
                         <td> <select class="giorno" name="giorno" required> </select></td>
                     </tr>
-                     <tr>
+                    <tr>
+                        <td> <label for="ora">Ora</label> </td>
+                        <td> <select class="ora" name="ora" required> </select></td>
+                    </tr>
+                    <tr>
+                        <td> <label for="note">Note</label> </td>
+                        <td> <input type="text" class="note" name="note"> </td>
+                    </tr>
+                </table>
+                <script>
+                    // --- SELEZIONI ---
+                    var giornoSelect = document.querySelector('.giorno');
+                    var oraSelect = document.querySelector('.ora');
+
+                    // Popola la select dei giorni
+                    giorni.forEach(g => {
+                        var option = document.createElement('option');
+                        option.value = g;
+                        option.textContent = g;
+                        giornoSelect.appendChild(option);
+                    });
+
+                    // Popola la select dell'ora
+                    orari.forEach(o => {
+                        var option = document.createElement('option');
+                        opt.value = o;
+                        opt.textContent = o;
+                        oraSelect.appendChild(option);
+                    });
+                </script>
+            </form>
+            <form class="dynamic-form form-medicine">
+                <table class="table-form">
+                    <tr>
+                        <td> <label for="paziente">Paziente</label> </td>
+                        <td> <input type="text" class="paziente" name="paziente" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="medicina">Medicina</label> </td>
+                        <td> <input type="text" class="medicina" name="medicina" required> </td>
+                    </tr>
+                    <tr>
+                        <td> <label for="giorno">Data</label> </td>
+                        <td> <select class="giorno" name="giorno" required> </select></td>
+                    </tr>
+                    <tr>
                         <td> <label for="ora">Ora</label> </td>
                         <td> <select class="ora" name="ora" required> </select></td>
                     </tr>
@@ -888,6 +948,11 @@
             const user = sessionStorage.getItem('currentUser');
             if (user) {
                 document.getElementById('currentUser').textContent = user;
+
+                // Mostra il bottone checkDate solo se l'utente NON è "test"
+                if (user !== 'test') {
+                    document.getElementById('checkDate').style.display = 'inline-block';
+                }
             }
         }
 
