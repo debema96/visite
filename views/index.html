@@ -199,6 +199,51 @@
                 alert("Impossibile scaricare il nulla");
             }
         };
+
+        var downloadMedicinePerPaziente = async () => {
+            let now = new Date().toLocaleDateString('it-IT').replace(/\//g, '_');
+            
+            if (!tabMed || Object.keys(tabMed).length === 0) {
+                alert("Nessuna medicina trovata");
+                return;
+            }
+
+            Object.entries(tabMed).forEach(([paziente, medicines]) => {
+                if (medicines.length === 0) return;
+                
+                const doc = new jsPDF();
+                let yPos = 20;
+                
+                // Titolo con nome paziente
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text("Medicine - " + paziente, 20, yPos);
+                
+                yPos += 15;
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'normal');
+                
+                // Lista puntata delle medicine
+                medicines.forEach(medicine => {
+                    let medicineText = "• " + (medicine.MEDICINA || medicine.medicina || "").toUpperCase();
+                    if (medicine.GIORNO || medicine.giorno) medicineText += " - " + (medicine.GIORNO || medicine.giorno);
+                    if (medicine.ORA || medicine.ora) medicineText += " (" + (medicine.ORA || medicine.ora) + ")";
+                    if (medicine.NOTE || medicine.note) medicineText += " - Note: " + (medicine.NOTE || medicine.note);
+                    
+                    const lines = doc.splitTextToSize(medicineText, 170);
+                    doc.text(lines, 20, yPos);
+                    yPos += lines.length * 7;
+                    
+                    // Pagina nuova se necessario
+                    if (yPos > 270) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                });
+                
+                doc.save(paziente + "_medicine_" + now + ".pdf");
+            });
+        };
         // VISITA CONTROLLER END
         var addForm = async () => {
             let formContainer = document.getElementById("formContainer");
@@ -237,7 +282,7 @@
 
             for (let form of formMedicine) {
                 var paziente = form.querySelector(".paziente").value;
-                var medicina = form.querySelector(".medicina").value;
+                var medicina = form.querySelector(".medicina").value.toUpperCase();
                 var giorno = form.querySelector(".giorno").value;
                 var ora = form.querySelector(".ora").value;
                 var note = form.querySelector(".note").value;
@@ -248,7 +293,7 @@
 
                 const medicinaData = {
                     paziente: paziente,
-                    medicina: medicina,
+                    medicina: medicina.toUpperCase(),
                     giorno: giorno,
                     ora: ora,
                     note: note
@@ -828,8 +873,7 @@
             <h1>MEDICINE</h1>
             <!-- <button type="button" onclick="addFormMedicina()">Aggiungi righe</button> -->
             <button type="submit" class="action-btn" onclick="aggiungiMedicina(event)">Salva</button>
-            <button class="action-btn" onclick="download('medicine')">Scarica separati</button>
-            <button class="action-btn" onclick="downloadAll('medicine')">Scarica insieme</button>
+            <button class="action-btn" onclick="downloadMedicinePerPaziente()">Scarica</button>
 
             <form class="dynamic-form form-medicine">
                 <table class="table-form">
