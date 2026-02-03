@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "timestamp": "2026-02-03T10:07:03.920Z",
+    "action": "LOGIN_FAILED",
+    "user": "carla",
+    "details": {
+      "message": "Tentativo di login fallito per carla"
+    }
+  },
+  {
+    "timestamp": "2026-02-03T10:07:09.891Z",
+    "action": "LOGIN_SUCCESS",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla loggato con successo"
+    }
+  },
+  {
+    "timestamp": "2026-02-03T10:07:19.697Z",
+    "action": "LOGOUT",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla disconnesso"
+    }
+  }
+]
