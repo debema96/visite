@@ -26,12 +26,5 @@
     "GIORNO": "tutti i giorni",
     "ORA": "cena",
     "NOTE": " "
-  },
-  {
-    "PAZIENTE": "carla",
-    "MEDICINA": "colecalciferolo 10000ui/ml (vitamina d)",
-    "GIORNO": "tutti i giorni",
-    "ORA": "cena",
-    "NOTE": " "
   }
 ]
