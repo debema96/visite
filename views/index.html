@@ -217,27 +217,58 @@
                 // Titolo con nome paziente
                 doc.setFontSize(16);
                 doc.setFont(undefined, 'bold');
-                doc.text("Medicine - " + paziente, 20, yPos);
+                doc.text(paziente, 20, yPos);
                 
-                yPos += 15;
+                yPos += 12;
                 doc.setFontSize(12);
                 doc.setFont(undefined, 'normal');
                 
-                // Lista puntata delle medicine
+                // Raggruppa medicine per orario
+                const orariOrder = ["colazione", "metà mattina", "pranzo", "metà pomeriggio", "cena"];
+                const medicinePerOrario = {};
+                
+                // Inizializza gli orari
+                orariOrder.forEach(orario => {
+                    medicinePerOrario[orario] = [];
+                });
+                
+                // Organizza medicine per orario
                 medicines.forEach(medicine => {
-                    let medicineText = "• " + (medicine.MEDICINA || medicine.medicina || "").toUpperCase();
-                    if (medicine.GIORNO || medicine.giorno) medicineText += " - " + (medicine.GIORNO || medicine.giorno);
-                    if (medicine.ORA || medicine.ora) medicineText += " (" + (medicine.ORA || medicine.ora) + ")";
-                    if (medicine.NOTE || medicine.note) medicineText += " - Note: " + (medicine.NOTE || medicine.note);
-                    
-                    const lines = doc.splitTextToSize(medicineText, 170);
-                    doc.text(lines, 20, yPos);
-                    yPos += lines.length * 7;
-                    
-                    // Pagina nuova se necessario
-                    if (yPos > 270) {
-                        doc.addPage();
-                        yPos = 20;
+                    const ora = (medicine.ORA || medicine.ora || "").toLowerCase();
+                    if (medicinePerOrario[ora]) {
+                        medicinePerOrario[ora].push(medicine);
+                    } else if (ora) {
+                        medicinePerOrario[ora] = [medicine];
+                    }
+                });
+                
+                // Stampa medicine organizzate per orario
+                orariOrder.forEach(orario => {
+                    if (medicinePerOrario[orario].length > 0) {
+                        // Titolo orario
+                        doc.setFont(undefined, 'bold');
+                        doc.text(orario.toUpperCase() + ":", 20, yPos);
+                        yPos += 8;
+                        doc.setFont(undefined, 'normal');
+                        
+                        // Medicine per questo orario
+                        medicinePerOrario[orario].forEach(medicine => {
+                            let medicineText = "- " + (medicine.MEDICINA || medicine.medicina || "").toUpperCase();
+                            if (medicine.GIORNO || medicine.giorno) medicineText += " (" + (medicine.GIORNO || medicine.giorno) + ")";
+                            if (medicine.NOTE || medicine.note) medicineText += " - " + (medicine.NOTE || medicine.note);
+                            
+                            const lines = doc.splitTextToSize(medicineText, 170);
+                            doc.text(lines, 25, yPos);
+                            yPos += lines.length * 6;
+                            
+                            // Pagina nuova se necessario
+                            if (yPos > 270) {
+                                doc.addPage();
+                                yPos = 20;
+                            }
+                        });
+                        
+                        yPos += 3; // Spazio tra orari
                     }
                 });
                 
