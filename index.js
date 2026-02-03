@@ -3,6 +3,7 @@ console.log("Hello, Node.js!");
 const express = require("express");
 const session = require("express-session");
 const path = require("path");
+const crypto = require("crypto");
 const IOFile = require("./models/IOFile");  // Importa la classe IOFile
 const VisitaController = require("./controllers/VisitaController");
 const MedicinaController = require("./controllers/MedicinaController");
@@ -11,6 +12,9 @@ const GitCommit = require("./models/GitCommit");  // Importa GitCommit
 const app = express();
 const PORT = 3000;
 
+// Genera una secret casuale e sicura usando crypto
+const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+
 const ioFile = new IOFile();  // Crea un'istanza della classe IOFile
 
 // Middleware per gestire JSON
@@ -18,7 +22,7 @@ app.use(express.json());
 
 // Middleware per gestire le sessioni
 app.use(session({
-    secret: 'your-secret-key-change-this',
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: true,
     cookie: { maxAge: 3600000 } // 1 ora
