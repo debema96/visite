@@ -138,6 +138,12 @@
                     });
                     doc.save(a + "_" + now + ".pdf");
                 })
+                // Log del download
+                fetch('/api/log-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'download', type: `${file} per paziente` })
+                }).catch(err => console.error('Errore log:', err));
             } else if (arr.length > 0) {
                 colonne = Object.keys(arr[0]).map(key => key.replaceAll("_", " "));
                 righe = arr.map(obj => Object.values(obj));
@@ -151,6 +157,12 @@
                     theme: 'grid'
                 });
                 doc.save(arr[0].PAZIENTE + "_" + now + ".pdf");
+                // Log del download
+                fetch('/api/log-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'download', type: file })
+                }).catch(err => console.error('Errore log:', err));
             } else {
                 console.log("Nessun paziente trovato");
                 alert("Impossibile scaricare il nulla");
@@ -292,6 +304,13 @@
                 
                 doc.save(paziente + "_medicine_" + now + ".pdf");
             });
+
+            // Log del download
+            fetch('/api/log-action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'download', type: 'medicine' })
+            }).catch(err => console.error('Errore log:', err));
         };
         // VISITA CONTROLLER END
         var addForm = async () => {

@@ -6,6 +6,7 @@ const path = require("path");
 const IOFile = require("./models/IOFile");  // Importa la classe IOFile
 const VisitaController = require("./controllers/VisitaController");
 const MedicinaController = require("./controllers/MedicinaController");
+const Logger = require("./models/Logger");  // Importa il Logger
 const app = express();
 const PORT = 3000;
 
@@ -91,6 +92,9 @@ app.get("/api/readmedicine", isAuthenticated, async (req, res) => {
 app.post("/api/aggiungi-visita", isAuthenticated, async (req, res) => {
     try {
         const result = await VisitaController.aggiungiVisita(req.body, req.session.userId);
+        if (result.success) {
+            Logger.addVisite(req.session.userId, 1);
+        }
         res.json(result);
     } catch (error) {
         console.error("Errore nell'aggiunta della visita:", error);
@@ -101,6 +105,9 @@ app.post("/api/aggiungi-visita", isAuthenticated, async (req, res) => {
 app.post("/api/aggiungi-medicina", isAuthenticated, async (req, res) => {
     try {
         const result = await MedicinaController.aggiungiMedicina(req.body, req.session.userId);
+        if (result.success) {
+            Logger.addMedicine(req.session.userId, 1);
+        }
         res.json(result);
     } catch (error) {
         console.error("Errore nell'aggiunta della medicina:", error);
@@ -166,9 +173,15 @@ app.post("/api/elimina-voce", isAuthenticated, async (req, res) => {
         
         if (tipo === "visita") {
             const result = await VisitaController.eliminaVoce(paziente, index, req.session.userId);
+            if (result.success) {
+                Logger.removeVisite(req.session.userId, 1);
+            }
             res.json(result);
         } else if (tipo === "medicina") {
             const result = await MedicinaController.eliminaVoce(paziente, index, req.session.userId);
+            if (result.success) {
+                Logger.removeMedicine(req.session.userId, 1);
+            }
             res.json(result);
         } else {
             res.status(400).json({ success: false, error: "Tipo non riconosciuto" });
@@ -191,6 +204,7 @@ app.post("/login", async (req, res) => {
 
         // Validazione campi
         if (!username || !password) {
+            Logger.loginFailed(username || 'sconosciuto');
             return res.json({
                 success: false,
                 message: "Username e password sono obbligatori"
@@ -206,6 +220,7 @@ app.post("/login", async (req, res) => {
         if (utenteValido) {
             // Salva l'utente nella sessione
             req.session.userId = utenteValido.utente;
+            Logger.loginSuccess(utenteValido.utente);
             console.log(`Utente ${utenteValido.utente} loggato`);
             res.json({
                 success: true,
@@ -213,6 +228,7 @@ app.post("/login", async (req, res) => {
                 user: utenteValido.utente
             });
         } else {
+            Logger.loginFailed(username);
             res.json({
                 success: false,
                 message: "Credenziali non valide"
@@ -220,6 +236,7 @@ app.post("/login", async (req, res) => {
         }
     } catch (error) {
         console.error("Errore durante il login:", error);
+        Logger.loginFailed('errore_server');
         res.status(500).json({
             success: false,
             message: "Errore del server"
@@ -229,12 +246,26 @@ app.post("/login", async (req, res) => {
 
 // Endpoint logout
 app.get("/logout", (req, res) => {
+    const user = req.session.userId;
     req.session.destroy((err) => {
         if (err) {
             console.error("Errore durante il logout:", err);
         }
+        if (user) {
+            Logger.logout(user);
+        }
         res.redirect('/');
     });
+});
+
+// Endpoint per il logging di azioni dal frontend
+app.post("/api/log-action", (req, res) => {
+    const { action, type } = req.body;
+    const user = req.session.userId || 'sconosciuto';
+    if (action === 'download') {
+        Logger.download(user, type);
+    }
+    res.json({ success: true });
 });
 
 // Avvio del server

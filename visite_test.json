@@ -30,5 +30,13 @@
     "LUOGO": "ospedale milano",
     "TIPO_VISITA": "nutrizionista",
     "NOTE": " "
+  },
+  {
+    "PAZIENTE": "t",
+    "DATA": "20/02/26",
+    "ORA": "20:00",
+    "LUOGO": "lodi",
+    "TIPO_VISITA": "bdfghjk",
+    "NOTE": " "
   }
 ]

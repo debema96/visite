@@ -22,13 +22,6 @@
   },
   {
     "PAZIENTE": "carla",
-    "MEDICINA": "rosuvastaina 20 mg",
-    "GIORNO": "tutti i giorni",
-    "ORA": "cena",
-    "NOTE": " "
-  },
-  {
-    "PAZIENTE": "carla",
     "MEDICINA": "ezetimibe 10 mg",
     "GIORNO": "tutti i giorni",
     "ORA": "cena",
