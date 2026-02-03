@@ -1,34 +1,3 @@
 [
-  {
-    "PAZIENTE": "patrizia",
-    "DATA": "20/03/25",
-    "ORA": "12.12",
-    "LUOGO": "milano",
-    "TIPO_VISITA": "dentista",
-    "NOTE": "1"
-  },
-  {
-    "PAZIENTE": "debora",
-    "DATA": "22/03/25",
-    "ORA": "12.12",
-    "LUOGO": "1",
-    "TIPO_VISITA": "1",
-    "NOTE": "1"
-  },
-  {
-    "PAZIENTE": "gabriele",
-    "DATA": "26/04/25",
-    "ORA": "15.30",
-    "LUOGO": "monzino",
-    "TIPO_VISITA": "cardiologo",
-    "NOTE": " "
-  },
-  {
-    "PAZIENTE": "debora",
-    "DATA": "22/01/26",
-    "ORA": "22:00",
-    "LUOGO": "casa",
-    "TIPO_VISITA": "boh",
-    "NOTE": "test"
-  }
+  
 ]

@@ -163,26 +163,43 @@
 
             if ((arr && Array.isArray(arr) && arr.length > 0) || (med && Array.isArray(med) && med.length > 0)) {
                 if (file == "visite") {
+                    // Colonne e righe dal file visite
                     colonne = Object.keys(arr[0]).map(key => key.replaceAll("_", " "));
                     righe = arr.map(obj => Object.values(obj));
+
+                    // Funzioni locali per parsing (sincrone)
+                    const parseDateLocal = (str) => {
+                        if (!str) return new Date(0);
+                        const parts = str.split('/');
+                        if (parts.length < 3) return new Date(str);
+                        let [d, m, y] = parts;
+                        y = parseInt(y, 10);
+                        if (y < 100) y = 2000 + y;
+                        return new Date(y, parseInt(m, 10) - 1, parseInt(d, 10));
+                    };
+
+                    const parseTimeLocal = (str) => {
+                        if (!str) return 0;
+                        const parts = String(str).split(':').map(Number);
+                        const h = parts[0] || 0;
+                        const min = parts[1] || 0;
+                        const s = parts[2] || 0;
+                        return h * 3600 + min * 60 + s;
+                    };
+
+                    // Ordina per data crescente; per stessa data ordina per orario crescente
                     righe.sort((a, b) => {
-                        const dataA = parseDate(a[1]);
-                        const dataB = parseDate(b[1]);
-
-                        if (dataA - dataB !== 0) {
-                            return dataA - dataB; // confronto per data
-                        } else {
-                            //console.log("differenze orario a=> ", a[2], " b=>", b[2])
-                            return parseTime(a[2]) - parseTime(b[2]); // confronto per ora
-                        }
+                        const dateA = parseDateLocal(a[1]);
+                        const dateB = parseDateLocal(b[1]);
+                        if (dateA - dateB !== 0) return dateA - dateB;
+                        // Stesso giorno -> confronto ora
+                        return parseTimeLocal(a[2]) - parseTimeLocal(b[2]);
                     });
-
-
-                }
-                else if (file == "medicine") {
+                } else if (file == "medicine") {
                     colonne = Object.keys(med[0]).map(key => key.replaceAll("_", " "));
                     righe = med.map(obj => Object.values(obj));
                 }
+
                 doc.autoTable({
                     head: [colonne],
                     body: righe,
@@ -192,6 +209,7 @@
                     bodyStyles: { fontSize: 14 },
                     theme: 'grid'
                 });
+
                 if (file == "visite") doc.save("visite_" + now + ".pdf");
                 else if (file == "medicine") doc.save("medicine_" + now + ".pdf");
             } else {
@@ -983,8 +1001,25 @@
             }
         }
 
-        // Carica le informazioni utente al caricamento
-        window.addEventListener('load', loadUserInfo);
+        // Assicura che gli input date siano interattivi su tutti i browser
+        function attachDatePickers() {
+            const dateInputs = document.querySelectorAll('input[type="date"].data');
+            dateInputs.forEach(input => {
+                // Stile per evitare che vengano coperti da overlay
+                input.style.position = 'relative';
+                input.style.zIndex = 9999;
+                input.style.cursor = 'pointer';
+
+                // Alcuni browser supportano showPicker() per aprire il calendario
+                const openPicker = () => { if (typeof input.showPicker === 'function') input.showPicker(); };
+
+                input.addEventListener('click', openPicker);
+                input.addEventListener('focus', openPicker);
+            });
+        }
+
+        // Carica le informazioni utente e inizializza i date pickers al caricamento
+        window.addEventListener('load', () => { loadUserInfo(); attachDatePickers(); });
     </script>
 
 </body>

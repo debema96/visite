@@ -22,5 +22,13 @@
     "LUOGO": "q",
     "TIPO_VISITA": "q",
     "NOTE": "q"
+  },
+  {
+    "PAZIENTE": "patrizia",
+    "DATA": "12/03/26",
+    "ORA": "15:00",
+    "LUOGO": "ospedale milano",
+    "TIPO_VISITA": "nutrizionista",
+    "NOTE": " "
   }
 ]

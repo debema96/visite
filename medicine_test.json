@@ -15,13 +15,6 @@
   },
   {
     "PAZIENTE": "carla",
-    "MEDICINA": "rivaroxaban 15 mg",
-    "GIORNO": "tutti i giorni",
-    "ORA": "pranzo",
-    "NOTE": " "
-  },
-  {
-    "PAZIENTE": "carla",
     "MEDICINA": "eutimil 20 mg",
     "GIORNO": "tutti i giorni",
     "ORA": "pranzo",
@@ -36,23 +29,23 @@
   },
   {
     "PAZIENTE": "carla",
-    "MEDICINA": "rosuvastaina 20 mg",
-    "GIORNO": "tutti i giorni",
-    "ORA": "cena",
-    "NOTE": " "
-  },
-  {
-    "PAZIENTE": "carla",
-    "MEDICINA": "ezetimibe 10 mg",
-    "GIORNO": "tutti i giorni",
-    "ORA": "cena",
-    "NOTE": " "
-  },
-  {
-    "PAZIENTE": "carla",
     "MEDICINA": "colecalciferolo 10000ui/ml (vitamina d)",
     "GIORNO": "tutti i giorni",
     "ORA": "cena",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "giuseppina",
+    "MEDICINA": "test 10mg",
+    "GIORNO": "tutti i giorni",
+    "ORA": "colazione",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "vittorio",
+    "MEDICINA": "test2",
+    "GIORNO": "mercoledì",
+    "ORA": "metà pomeriggio",
     "NOTE": " "
   }
 ]
