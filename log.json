@@ -1,2 +1,18 @@
 [
+  {
+    "timestamp": "2026-02-03T10:22:45.723Z",
+    "action": "LOGIN_SUCCESS",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla loggato con successo"
+    }
+  },
+  {
+    "timestamp": "2026-02-03T10:22:54.818Z",
+    "action": "LOGOUT",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla disconnesso"
+    }
+  }
 ]
