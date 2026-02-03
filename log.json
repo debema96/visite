@@ -14,5 +14,61 @@
     "details": {
       "message": "Utente carla disconnesso"
     }
+  },
+  {
+    "timestamp": "2026-02-03T10:29:15.273Z",
+    "action": "LOGIN_SUCCESS",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla loggato con successo"
+    }
+  },
+  {
+    "timestamp": "2026-02-03T10:33:39.965Z",
+    "action": "LOGIN_SUCCESS",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla loggato con successo"
+    }
+  },
+  {
+    "timestamp": "2026-02-03T10:33:44.757Z",
+    "action": "LOGOUT",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla disconnesso"
+    }
+  },
+  {
+    "timestamp": "2026-02-03T10:35:10.303Z",
+    "action": "LOGIN_SUCCESS",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla loggato con successo"
+    }
+  },
+  {
+    "timestamp": "2026-02-03T10:35:16.011Z",
+    "action": "LOGOUT",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla disconnesso"
+    }
+  },
+  {
+    "timestamp": "2026-02-03T10:36:56.511Z",
+    "action": "LOGIN_SUCCESS",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla loggato con successo"
+    }
+  },
+  {
+    "timestamp": "2026-02-03T10:37:03.278Z",
+    "action": "LOGOUT",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla disconnesso"
+    }
   }
 ]

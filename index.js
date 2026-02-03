@@ -8,7 +8,7 @@ const IOFile = require("./models/IOFile");  // Importa la classe IOFile
 const VisitaController = require("./controllers/VisitaController");
 const MedicinaController = require("./controllers/MedicinaController");
 const Logger = require("./models/Logger");  // Importa il Logger
-const GitCommit = require("./models/GitCommit");  // Importa GitCommit
+//disabilitato in sviluppo const GitCommit = require("./models/GitCommit");  // Importa GitCommit 
 const app = express();
 const PORT = 3000;
 
@@ -259,8 +259,8 @@ app.get("/logout", (req, res) => {
         if (user) {
             Logger.logout(user);
             // Esegui git commit e push
-            const gitResult = GitCommit.commitAndPush(user);
-            console.log('Risultato git:', gitResult);
+            // disabilitato in sviluppo const gitResult = GitCommit.commitAndPush(user);
+            // disabilitato in sviluppoconsole.log('Risultato git:', gitResult);
         }
         res.redirect('/');
     });
