@@ -54,12 +54,5 @@
     "GIORNO": "tutti i giorni",
     "ORA": "cena",
     "NOTE": " "
-  },
-  {
-    "PAZIENTE": "carla",
-    "MEDICINA": "folina 5 mg (alterno 3 mesi si e 3 mesi no)",
-    "GIORNO": "tutti i giorni",
-    "ORA": "",
-    "NOTE": "cura tao"
   }
 ]

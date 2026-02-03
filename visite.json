@@ -16,14 +16,6 @@
     "NOTE": "1"
   },
   {
-    "PAZIENTE": "patrizia",
-    "DATA": "04/04/25",
-    "ORA": "13.13",
-    "LUOGO": "2",
-    "TIPO_VISITA": "2",
-    "NOTE": "2"
-  },
-  {
     "PAZIENTE": "gabriele",
     "DATA": "26/04/25",
     "ORA": "15.30",
