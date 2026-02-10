@@ -95,11 +95,11 @@ var MedicinaController = {
             let data = await ioFile.readFile(fileToRead);
 
             const nuovaMedicina = {
-                PAZIENTE: medicina.paziente.toLowerCase(),
+                PAZIENTE: (medicina.paziente || "").toUpperCase(),
                 MEDICINA: medicina.medicina.toLowerCase() || " ",
-                GIORNO: medicina.giorno,
+                //GIORNO: medicina.giorno,
                 ORA: medicina.ora,
-                NOTE: medicina.note.toLowerCase() || " "
+                NOTE: (medicina.note || "").toLowerCase() || " "
             };
 
             data.push(nuovaMedicina);
@@ -131,7 +131,7 @@ var MedicinaController = {
                 const indiceVero = data.findIndex(m => 
                     m.PAZIENTE === medicinaEliminata.PAZIENTE && 
                     m.MEDICINA === medicinaEliminata.MEDICINA &&
-                    m.GIORNO === medicinaEliminata.GIORNO &&
+                    //m.GIORNO === medicinaEliminata.GIORNO &&
                     m.ORA === medicinaEliminata.ORA &&
                     m.NOTE === medicinaEliminata.NOTE
                 );

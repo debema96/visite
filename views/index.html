@@ -284,7 +284,7 @@
                         // Medicine per questo orario
                         medicinePerOrario[orario].forEach(medicine => {
                             let medicineText = "- " + (medicine.MEDICINA || medicine.medicina || "").toUpperCase();
-                            if (medicine.GIORNO || medicine.giorno) medicineText += " (" + (medicine.GIORNO || medicine.giorno) + ")";
+                            //if (medicine.GIORNO || medicine.giorno) medicineText += " (" + (medicine.GIORNO || medicine.giorno) + ")";
                             if (medicine.NOTE || medicine.note) medicineText += " - " + (medicine.NOTE || medicine.note);
                             
                             const lines = doc.splitTextToSize(medicineText, 170);
@@ -337,8 +337,9 @@
             // Resetta i valori dei campi nella nuova form
             newForm.querySelector(".paziente").value = "";
             newForm.querySelector(".medicina").value = "";
-            newForm.querySelector(".giorno").value = "";
-            newForm.querySelector(".ora").value = "";
+            //newForm.querySelector(".giorno").value = "";
+            newForm.querySelector(".orario").value = "";
+            newForm.querySelector(".quando").value = "";
             newForm.querySelector(".note").value = "";
 
             formContainer.appendChild(newForm); // Aggiunge la nuova form alla pagina
@@ -351,18 +352,31 @@
             for (let form of formMedicine) {
                 var paziente = form.querySelector(".paziente").value;
                 var medicina = form.querySelector(".medicina").value.toUpperCase();
-                var giorno = form.querySelector(".giorno").value;
-                var ora = form.querySelector(".ora").value;
+                var quando = form.querySelector(".quando").value;
+                var orario = form.querySelector(".orario").value;
                 var note = form.querySelector(".note").value;
 
-                if (!paziente && !medicina && !giorno && !ora && !note) {
+                // Calcola il valore di "ora" in base alla logica richiesta
+                var ora = "";
+                
+                if (orario && quando) {
+                    // Se sono presenti sia "orario" sia "quando"
+                    ora = quando + " - " + orario;
+                } else if (quando) {
+                    // Se è presente solo il campo "quando"
+                    ora = quando;
+                } else if (orario) {
+                    // Se è presente solo "orario"
+                    ora = orario;
+                }
+
+                if (!paziente && !medicina && !quando && !orario && !note) {
                     continue; // Salta i form vuoti
                 }
 
                 const medicinaData = {
                     paziente: paziente,
                     medicina: medicina.toUpperCase(),
-                    giorno: giorno,
                     ora: ora,
                     note: note
                 };
@@ -371,6 +385,8 @@
                     const result = await apiService.aggiungiMedicina(medicinaData);
                     if (result.success) {
                         form.reset();
+                        // Resetta il campo ora
+                        form.querySelector(".ora").value = "";
                     } else {
                         alert("Errore: " + result.error);
                     }
@@ -954,12 +970,18 @@
                         <td> <input type="text" class="medicina" name="medicina" required> </td>
                     </tr>
                     <tr>
-                        <td> <label for="giorno">Data</label> </td>
-                        <td> <select class="giorno" name="giorno" required> </select></td>
+                        <td> <label for="quando">Quando</label> </td>
+                        <td> <select class="quando" name="quando">
+                            <option value="">Seleziona...</option>
+                        </select></td>
+                    </tr>
+                    <tr>
+                        <td> <label for="orario">Orario (24h)</label> </td>
+                        <td> <input type="time" class="orario" name="orario"> </td>
                     </tr>
                     <tr>
                         <td> <label for="ora">Ora</label> </td>
-                        <td> <select class="ora" name="ora" required> </select></td>
+                        <td> <input type="text" class="ora" name="ora" readonly style="background-color: #f0f0f0;"> </td>
                     </tr>
                     <tr>
                         <td> <label for="note">Note</label> </td>
@@ -968,30 +990,52 @@
                 </table>
                 <script>
                     // --- SELEZIONI ---
-                    var giorniSelects = document.querySelectorAll('.giorno');
-                    var oraSelects = document.querySelectorAll('.ora');
-
-                    // Definisci giorni e orari secondo l'ordinamento
-                    const giorni = ["tutti i giorni", "giorni alterni", "lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"];
+                    var quandoSelects = document.querySelectorAll('.quando');
+                    
+                    // Definisci orari secondo l'ordinamento
                     const orari = ["colazione", "metà mattina", "pranzo", "metà pomeriggio", "cena"];
 
-                    // Popola tutti i select dei giorni
-                    giorniSelects.forEach(giornoSelect => {
-                        giorni.forEach(g => {
-                            var option = document.createElement('option');
-                            option.value = g;
-                            option.textContent = g;
-                            giornoSelect.appendChild(option);
-                        });
-                    });
+                    // Funzione per aggiornare il campo "ora" in base a "quando" e "orario"
+                    const updateOraField = (form) => {
+                        const quandoValue = form.querySelector('.quando')?.value || '';
+                        const orarioValue = form.querySelector('.orario')?.value || '';
+                        const oraField = form.querySelector('.ora');
+                        
+                        let oraValue = '';
+                        if (orarioValue && quandoValue) {
+                            oraValue = quandoValue + ' - ' + orarioValue;
+                        } else if (quandoValue) {
+                            oraValue = quandoValue;
+                        } else if (orarioValue) {
+                            oraValue = orarioValue;
+                        }
+                        
+                        if (oraField) {
+                            oraField.value = oraValue;
+                        }
+                    };
 
-                    // Popola tutti i select dell'ora
-                    oraSelects.forEach(oraSelect => {
+                    // Popola tutti i select del "quando" e aggiungi event listener
+                    quandoSelects.forEach(quandoSelect => {
                         orari.forEach(o => {
                             var option = document.createElement('option');
                             option.value = o;
                             option.textContent = o;
-                            oraSelect.appendChild(option);
+                            quandoSelect.appendChild(option);
+                        });
+                        
+                        // Aggiungi event listener al cambio di "quando"
+                        quandoSelect.addEventListener('change', function() {
+                            const form = quandoSelect.closest('.form-medicine');
+                            updateOraField(form);
+                        });
+                    });
+                    
+                    // Aggiungi event listener ai campi "orario"
+                    document.querySelectorAll('.orario').forEach(orarioInput => {
+                        orarioInput.addEventListener('change', function() {
+                            const form = orarioInput.closest('.form-medicine');
+                            updateOraField(form);
                         });
                     });
                 </script>

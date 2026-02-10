@@ -1,51 +1,68 @@
 [
   {
-    "PAZIENTE": "carla",
+    "PAZIENTE": "CARLA",
     "MEDICINA": "1 olmesartan 40 mg",
-    "GIORNO": "tutti i giorni",
     "ORA": "colazione",
     "NOTE": ""
   },
   {
-    "PAZIENTE": "carla",
+    "PAZIENTE": "CARLA",
     "MEDICINA": "mioamin silver",
-    "GIORNO": "tutti i giorni",
     "ORA": "metà mattina",
     "NOTE": "novembre e dicembre \\ pausa 2 mesi \\ prossimi 2 mesi riprendere, cura continuativa"
   },
   {
-    "PAZIENTE": "carla",
+    "PAZIENTE": "CARLA",
     "MEDICINA": "eutimil 20 mg",
-    "GIORNO": "tutti i giorni",
     "ORA": "pranzo",
     "NOTE": " "
   },
   {
-    "PAZIENTE": "carla",
+    "PAZIENTE": "CARLA",
     "MEDICINA": "cardioaspirina (acitil salicidico)",
-    "GIORNO": "tutti i giorni",
     "ORA": "pranzo",
     "NOTE": " "
   },
   {
-    "PAZIENTE": "carla",
+    "PAZIENTE": "CARLA",
     "MEDICINA": "colecalciferolo 10000ui/ml (vitamina d)",
-    "GIORNO": "tutti i giorni",
     "ORA": "cena",
     "NOTE": " "
   },
   {
-    "PAZIENTE": "giuseppina",
+    "PAZIENTE": "GIUSEPPINA",
     "MEDICINA": "test 10mg",
-    "GIORNO": "tutti i giorni",
     "ORA": "colazione",
     "NOTE": " "
   },
   {
-    "PAZIENTE": "vittorio",
+    "PAZIENTE": "VITTORIO",
     "MEDICINA": "test2",
-    "GIORNO": "mercoledì",
     "ORA": "metà pomeriggio",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "VITTORIO",
+    "MEDICINA": "test",
+    "ORA": "12:25",
+    "NOTE": "test"
+  },
+  {
+    "PAZIENTE": "GIUSEPPINA",
+    "MEDICINA": "test3",
+    "ORA": "metà mattina - 10:30",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "GIUSEPPINA",
+    "MEDICINA": "test4",
+    "ORA": "metà mattina - 11:30",
+    "NOTE": " "
+  },
+  {
+    "PAZIENTE": "GIUSEPPINA",
+    "MEDICINA": "test5",
+    "ORA": "metà mattina - 10:00",
     "NOTE": " "
   }
 ]

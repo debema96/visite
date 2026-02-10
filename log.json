@@ -70,5 +70,31 @@
     "details": {
       "message": "Utente carla disconnesso"
     }
+  },
+  {
+    "timestamp": "2026-02-03T18:49:38.653Z",
+    "action": "LOGIN_SUCCESS",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla loggato con successo"
+    }
+  },
+  {
+    "timestamp": "2026-02-03T18:49:50.376Z",
+    "action": "DOWNLOAD",
+    "user": "carla",
+    "details": {
+      "type": "medicine",
+      "details": null,
+      "message": "Download di medicine"
+    }
+  },
+  {
+    "timestamp": "2026-02-10T10:19:43.608Z",
+    "action": "LOGIN_SUCCESS",
+    "user": "carla",
+    "details": {
+      "message": "Utente carla loggato con successo"
+    }
   }
 ]
