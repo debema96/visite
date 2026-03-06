@@ -151,7 +151,7 @@ app.get("/api/organizza-medicine", isAuthenticated, async (req, res) => {
 });
 
 // Rotta per scrivere i dati nel file
-app.post("/api/writevisite", (req, res) => {
+app.post("/api/writevisite", isAuthenticated, (req, res) => {
     const fileToWrite = req.session.userId === 'test' ? 'visite_test' : 'visite';
     ioFile.writeFile(fileToWrite, req.body);
     console.log(`Visite salvate nel file: ${fileToWrite}`);
@@ -198,7 +198,9 @@ app.post("/api/elimina-voce", isAuthenticated, async (req, res) => {
 });
 
 app.post("/api/writemedicine", isAuthenticated, (req, res) => {
-    ioFile.writeFile("medicine",req.body);  // Uso corretto dell'istanza
+    const fileToWrite = req.session.userId === 'test' ? 'medicine_test' : 'medicine';
+    ioFile.writeFile(fileToWrite, req.body);
+    console.log(`Medicine salvate nel file: ${fileToWrite}`);
     res.send("Dati salvati correttamente!");
 });
 
